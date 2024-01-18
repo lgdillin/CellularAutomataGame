@@ -133,7 +133,18 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Controller.cpp" />
+    <ClCompile Include="Game.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="View.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Controller.hpp" />
+    <ClInclude Include="Shader.hpp" />
+    <ClInclude Include="View.hpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Game.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
