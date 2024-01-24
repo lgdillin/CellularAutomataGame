@@ -140,11 +140,17 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Controller.hpp" />
+    <ClInclude Include="MyVectors.hpp" />
+    <ClInclude Include="Particle.hpp" />
+    <ClInclude Include="Sand.hpp" />
     <ClInclude Include="Shader.hpp" />
+    <ClInclude Include="shader1.frag" />
+    <ClInclude Include="Texture.hpp" />
     <ClInclude Include="View.hpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Game.hpp" />
+    <None Include="shader1.vert" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

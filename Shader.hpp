@@ -92,4 +92,9 @@ namespace Shader {
 			_glslCode.c_str());
 		glUniform2fv(uniformLocation, 1, glm::value_ptr(_v));
 	}
+
+	static GLint getSampler2d(GLuint _shaderId, std::string _glslCode) {
+		GLint textureUniform = glGetUniformLocation(_shaderId, _glslCode.c_str());
+
+	}
 }
