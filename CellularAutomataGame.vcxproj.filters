@@ -53,6 +53,9 @@
     <ClInclude Include="MyVectors.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Macros.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Game.hpp">

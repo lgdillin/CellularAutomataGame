@@ -140,6 +140,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Controller.hpp" />
+    <ClInclude Include="Macros.hpp" />
     <ClInclude Include="MyVectors.hpp" />
     <ClInclude Include="Particle.hpp" />
     <ClInclude Include="Sand.hpp" />

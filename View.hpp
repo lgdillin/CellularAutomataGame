@@ -5,6 +5,8 @@
 #include <GL/glew.h>
 #include <SDL.h>
 
+#include "Macros.hpp"
+
 #include "Game.hpp"
 #include "Controller.hpp"
 #include "Shader.hpp"
@@ -18,9 +20,12 @@ public:
 
 	void repaint();
 
+	void updateTexture();
+
 	void initialize();
 
-
+	//std::uint8_t *m_particleColors;
+	std::vector<GLubyte> m_pColors;
 private:
 	int m_mainWidth;
 	int m_mainHeight;
@@ -28,8 +33,8 @@ private:
 	SDL_Renderer *m_mainRenderer;
 	SDL_GLContext m_glContext;
 
-	Game m_game;
-	Controller m_controller;
+	Game *m_game;
+	Controller *m_controller;
 
 	GLuint m_vao;
 	GLuint m_vbo;
@@ -39,7 +44,7 @@ private:
 	GLuint m_framebuffer;
 
 	//std::vector<std::vector<Particle>> m_pixels;
-	GLubyte data[100][100][4];
+	//GLubyte data[100][100][4];
 
 	GLfloat m_vertices[16] = {
 		-1.0f, -1.0f, // pos

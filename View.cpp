@@ -1,24 +1,23 @@
 #include "View.hpp"
 
-View::View(Game &_game, Controller &_controller) : m_controller(_game) {
-	m_game = _game;
-	m_controller = _controller;
+View::View(Game &_game, Controller &_controller) 
+	: m_game(&_game), m_controller(&_controller)
+{
 
-	m_mainWidth = 800;
-	m_mainHeight = 600;
+
+	m_mainWidth = SCREEN_WIDTH;
+	m_mainHeight = SCREEN_HEIGHT;
+	m_pColors = std::vector<GLubyte>(TEXTURE_ROWS * TEXTURE_COLS * 3);
 
 	m_mainWindow = nullptr;
 	m_glContext = nullptr;
 	m_mainRenderer = nullptr;
-
-	for (int i = 0; i < 100; ++i) {
-		for (int j = 0; j < 100; ++j) {
-			data[i][j][0] = 0;
-			data[i][j][1] = 0;
-			data[i][j][2] = 0;
-			data[i][j][3] = 255;
-		}
-	}
+	m_vao = 0;
+	m_vbo = 0;
+	m_ibo = 0;
+	m_shaderId = 0;
+	m_textureId = 0;
+	m_framebuffer = 0;
 }
 
 View::~View() {
@@ -31,24 +30,14 @@ void View::repaint() {
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	//glBindFramebuffer(GL_FRAMEBUFFER, m_framebuffer);
-	//glUseProgram(m_shaderId);
-
-	for (auto &p : m_game.m_particles) {
-		data[p.m_position.x][p.m_position.y][0] = p.m_color.x;
-		data[p.m_position.x][p.m_position.y][1] = p.m_color.y;
-		data[p.m_position.x][p.m_position.y][2] = p.m_color.z;
-		data[p.m_position.x][p.m_position.y][3] = 255;
-	}
-
-	// render here
-	Shader::setTexture(m_shaderId, "u_tex", 0);
-
-	//glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	updateTexture();
 	
 
 	glUseProgram(m_shaderId);
+	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, m_textureId);
+	Shader::setTexture(m_shaderId, "u_tex", 0);
+
 	glBindVertexArray(m_vao);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_ibo);
 
@@ -57,7 +46,28 @@ void View::repaint() {
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
 
+	glBindTexture(GL_TEXTURE_2D, 0);
+
 	SDL_GL_SwapWindow(m_mainWindow);
+}
+
+void View::updateTexture() {
+	for (int i = 0; i < TEXTURE_ROWS * TEXTURE_COLS; ++i) {
+		if (m_game->m_particles[i].m_id == EMPTY) {
+			m_pColors[3 * i] = 0;
+			m_pColors[3 * i + 1] = 0;
+			m_pColors[3 * i + 2] = 0;
+		} else {
+			m_pColors[3 * i] = m_game->m_particles[i].m_color.x;
+			m_pColors[3 * i + 1] = m_game->m_particles[i].m_color.y;
+			m_pColors[3 * i + 2] = m_game->m_particles[i].m_color.z;
+		}
+	}
+
+	glBindTexture(GL_TEXTURE_2D, m_textureId);
+	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, TEXTURE_COLS, TEXTURE_ROWS, GL_RGB,
+		GL_UNSIGNED_BYTE, m_pColors.data());
+	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 void View::initialize() {
@@ -79,6 +89,9 @@ void View::initialize() {
 		SDL_Log("Window failed to create, error: %s\n", SDL_GetError());
 	}
 	m_mainRenderer = SDL_CreateRenderer(m_mainWindow, -1, rendererFlag);
+
+	// allows for more frequent mouse polling (dont work)
+	//SDL_SetRelativeMouseMode(SDL_TRUE);
 
 	m_glContext = SDL_GL_CreateContext(m_mainWindow);
 	const GLubyte *version = glGetString(GL_VERSION);
@@ -130,11 +143,17 @@ void View::initialize() {
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 100, 100, 
-		0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+	for (int i = 0; i < TEXTURE_ROWS * TEXTURE_COLS; ++i) {
+		Particle p = m_game->m_particles[i];
+		m_pColors[3 * i] = m_game->m_particles[i].m_color.x;
+		m_pColors[3 * i + 1] = m_game->m_particles[i].m_color.y;
+		m_pColors[3 * i + 2] = m_game->m_particles[i].m_color.z;
+	}
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, TEXTURE_COLS, TEXTURE_ROWS, 
+		0, GL_RGB, GL_UNSIGNED_BYTE, m_pColors.data());
 
 	glBindTexture(GL_TEXTURE_2D, 0);
 

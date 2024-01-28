@@ -4,27 +4,27 @@
 
 #include "MyVectors.hpp"
 
-enum Material {
-	EMPTY,
-	SAND
-};
-
+/// <summary>
+/// Particle class
+/// </summary>
+/// <param name="m_id">
+/// 0: EMPTY
+/// 1: SAND
+/// </param>
 class Particle {
 public:
 	Particle() {
-		m_material = EMPTY;
+		m_id = 0;
+		m_life = 255;
+		m_temp = 70;
 		m_color = { 0, 0, 0 };
-		m_velocity = { 0.0f, 0.0f };
-		m_position = { 0, 0 };
 	};
 	~Particle() {};
 
 	virtual void update() {}
 
-	Material m_material;
-	//glm::vec3 m_color;
-	//glm::vec2 m_position;
-	vec::vec3i m_color;
-	vec::vec2i m_position;
-	glm::vec2 m_velocity;
+	std::uint8_t m_id;
+	std::uint8_t m_life;
+	std::uint8_t m_temp;
+	vec::vec3u8 m_color;
 };
