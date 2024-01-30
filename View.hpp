@@ -24,6 +24,8 @@ public:
 
 	void initialize();
 
+	SDL_Window *getWindow() { return m_mainWindow; }
+
 	//std::uint8_t *m_particleColors;
 	std::vector<GLubyte> m_pColors;
 private:

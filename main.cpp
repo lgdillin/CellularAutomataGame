@@ -2,9 +2,31 @@
 
 #include <GL/glew.h>
 #include <SDL.h>
+#include <chrono>
 
 #include "Game.hpp"
 #include "View.hpp"
+
+std::chrono::steady_clock::time_point frameStart, frameEnd;
+int frameCount = 0;
+
+void calculateFPS(View &_view) {
+	frameEnd = std::chrono::steady_clock::now();
+	auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(frameEnd - frameStart).count();
+
+	if (duration >= 1000) {
+		int fps = frameCount * 1000 / duration;
+		//std::cout << "FPS: " << fps << std::endl;
+
+		std::string title = "FPS Counter - FPS: " + std::to_string(fps);
+		SDL_SetWindowTitle(_view.getWindow(), title.c_str());
+
+		frameStart = std::chrono::steady_clock::now();
+		frameCount = 0;
+	} else {
+		frameCount++;
+	}
+}
 
 /// <summary>
 /// I love you <3 J
@@ -27,11 +49,10 @@ int main(int argc, char *argv[]) {
 	controller.initialize();
 
 	// wait for OS to catch up
-	SDL_Delay(1000);
+	//SDL_Delay(1000);
 
 	// main loop
 	bool quit = false;
-	SDL_Event e;
 	const int targetFramerate = 40;
 	const int frameDelay = 1000 / targetFramerate;
 	Uint32 frameStart, frameTime;
@@ -51,6 +72,7 @@ int main(int argc, char *argv[]) {
 		if (frameDelay > frameTime) {
 			SDL_Delay(frameDelay - frameTime);
 		}
+		calculateFPS(view);
 	}
 
 	

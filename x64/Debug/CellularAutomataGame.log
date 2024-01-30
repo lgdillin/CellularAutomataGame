@@ -1,29 +1,4 @@
 ﻿  Game.cpp
-C:\Users\liamd\OneDrive\Documents\Visual Studio Projects\CellularAutomataGame\Game.cpp(46,19): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
-C:\Users\liamd\OneDrive\Documents\Visual Studio Projects\CellularAutomataGame\Game.cpp(46,16): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
-C:\Users\liamd\OneDrive\Documents\Visual Studio Projects\CellularAutomataGame\Game.cpp(49,20): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
-C:\Users\liamd\OneDrive\Documents\Visual Studio Projects\CellularAutomataGame\Game.cpp(49,17): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
-C:\Users\liamd\OneDrive\Documents\Visual Studio Projects\CellularAutomataGame\Game.cpp(52,19): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
-C:\Users\liamd\OneDrive\Documents\Visual Studio Projects\CellularAutomataGame\Game.cpp(52,16): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
-C:\Users\liamd\OneDrive\Documents\Visual Studio Projects\CellularAutomataGame\Game.cpp(55,20): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
-C:\Users\liamd\OneDrive\Documents\Visual Studio Projects\CellularAutomataGame\Game.cpp(55,17): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
-C:\Users\liamd\OneDrive\Documents\Visual Studio Projects\CellularAutomataGame\Game.cpp(58,20): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
-C:\Users\liamd\OneDrive\Documents\Visual Studio Projects\CellularAutomataGame\Game.cpp(58,17): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
-C:\Users\liamd\OneDrive\Documents\Visual Studio Projects\CellularAutomataGame\Game.cpp(78,10): warning C4101: 'c': unreferenced local variable
-C:\Users\liamd\OneDrive\Documents\Visual Studio Projects\CellularAutomataGame\Game.cpp(207,46): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
-C:\Users\liamd\OneDrive\Documents\Visual Studio Projects\CellularAutomataGame\Game.cpp(207,20): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
-C:\Users\liamd\OneDrive\Documents\Visual Studio Projects\CellularAutomataGame\Game.cpp(211,42): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
-C:\Users\liamd\OneDrive\Documents\Visual Studio Projects\CellularAutomataGame\Game.cpp(211,20): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
-C:\Users\liamd\OneDrive\Documents\Visual Studio Projects\CellularAutomataGame\Game.cpp(215,46): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
-C:\Users\liamd\OneDrive\Documents\Visual Studio Projects\CellularAutomataGame\Game.cpp(215,20): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
-C:\Users\liamd\OneDrive\Documents\Visual Studio Projects\CellularAutomataGame\Game.cpp(219,42): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
-C:\Users\liamd\OneDrive\Documents\Visual Studio Projects\CellularAutomataGame\Game.cpp(219,20): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
-C:\Users\liamd\OneDrive\Documents\Visual Studio Projects\CellularAutomataGame\Game.cpp(223,42): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
-C:\Users\liamd\OneDrive\Documents\Visual Studio Projects\CellularAutomataGame\Game.cpp(223,20): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
-C:\Users\liamd\OneDrive\Documents\Visual Studio Projects\CellularAutomataGame\Game.cpp(227,46): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
-C:\Users\liamd\OneDrive\Documents\Visual Studio Projects\CellularAutomataGame\Game.cpp(227,20): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
-C:\Users\liamd\OneDrive\Documents\Visual Studio Projects\CellularAutomataGame\Game.cpp(231,42): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
-C:\Users\liamd\OneDrive\Documents\Visual Studio Projects\CellularAutomataGame\Game.cpp(231,20): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
-C:\Users\liamd\OneDrive\Documents\Visual Studio Projects\CellularAutomataGame\Game.cpp(235,46): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
-C:\Users\liamd\OneDrive\Documents\Visual Studio Projects\CellularAutomataGame\Game.cpp(235,20): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\liamd\OneDrive\Documents\Visual Studio Projects\CellularAutomataGame\Game.cpp(101,16): warning C4244: 'initializing': conversion from 'float' to 'int', possible loss of data
+C:\Users\liamd\OneDrive\Documents\Visual Studio Projects\CellularAutomataGame\Game.cpp(358,10): warning C4101: 'c': unreferenced local variable
   CellularAutomataGame.vcxproj -> C:\Users\liamd\OneDrive\Documents\Visual Studio Projects\CellularAutomataGame\x64\Debug\CellularAutomataGame.exe

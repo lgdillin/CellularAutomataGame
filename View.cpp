@@ -4,7 +4,6 @@ View::View(Game &_game, Controller &_controller)
 	: m_game(&_game), m_controller(&_controller)
 {
 
-
 	m_mainWidth = SCREEN_WIDTH;
 	m_mainHeight = SCREEN_HEIGHT;
 	m_pColors = std::vector<GLubyte>(TEXTURE_ROWS * TEXTURE_COLS * 3);

@@ -40,11 +40,15 @@ namespace vec {
 }
 
 namespace mymath {
-	static uint8_t min(uint8_t _x, uint8_t _y) {
+	static inline uint8_t min(uint8_t _x, uint8_t _y) {
 		return _x < _y ? _x : _y;
 	}
 
-	static uint8_t abs(uint8_t _x) {
+	static inline uint8_t max(uint8_t _x, uint8_t _y) {
+		return _x > _y ? _x : _y;
+	}
+
+	static inline uint8_t abs(uint8_t _x) {
 		return _x > 0 ? _x : -_x;
 	}
 }

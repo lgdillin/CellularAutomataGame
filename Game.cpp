@@ -1,28 +1,36 @@
 #include "Game.hpp"
 
 Game::Game() {
+	m_updateLatch = 0;
 	std::random_device rd;
-	m_randomGen = std::mt19937(rd());
+	m_rg = std::mt19937(rd());
 	m_dWall = std::uniform_int_distribution<int>(40, 50);
 	m_dSand = std::uniform_int_distribution<int>(120, 150);
 	m_dWater = std::uniform_int_distribution<int>(120, 150);
 	m_dFire = std::uniform_int_distribution<int>(20, 40);
+	m_dist = std::uniform_int_distribution<int>(0, 99);
 
 	m_particles = std::vector<Particle>(TEXTURE_ROWS * TEXTURE_COLS);
+	m_particleChoice = 0;
 
-	for (size_t i = 0; i < TEXTURE_ROWS; ++i) {
-		bool coinFlip = (rand() > RAND_MAX / 2);
-		if (coinFlip) continue;
-		coinFlip = (rand() > RAND_MAX / 2);
-		int adjust = 0;
-		if (coinFlip) adjust = 10;
+	m_mousex = 0;
+	m_mousey = 0;
+	m_brushSize = 1;
 
-		m_particles[(TEXTURE_ROWS * TEXTURE_COLS - TEXTURE_ROWS) + i].m_id = SAND;
-		m_particles[(TEXTURE_ROWS * TEXTURE_COLS - TEXTURE_ROWS) + i].m_color.x 
-			= static_cast<uint8_t>(m_dSand(m_randomGen) + 50);
-		m_particles[(TEXTURE_ROWS * TEXTURE_COLS - TEXTURE_ROWS) + i].m_color.y 
-			= static_cast<uint8_t>(m_dSand(m_randomGen));
-	}
+	//for (size_t i = 0; i < TEXTURE_ROWS; ++i) {
+	//	bool coinFlip = (rand() > RAND_MAX / 2);
+	//	if (coinFlip) continue;
+	//	coinFlip = (rand() > RAND_MAX / 2);
+	//	int adjust = 0;
+	//	if (coinFlip) adjust = 10;
+
+	//	m_particles[(TEXTURE_ROWS * TEXTURE_COLS - TEXTURE_ROWS) + i].m_id = SAND;
+	//	m_particles[(TEXTURE_ROWS * TEXTURE_COLS - TEXTURE_ROWS) + i].m_color.x 
+	//		= static_cast<uint8_t>(m_dSand(m_randomGen) + 50);
+	//	m_particles[(TEXTURE_ROWS * TEXTURE_COLS - TEXTURE_ROWS) + i].m_color.y 
+	//		= static_cast<uint8_t>(m_dSand(m_randomGen));
+	//	
+	//}
 }
 
 Game::~Game() {
@@ -33,8 +41,11 @@ void Game::initialize() {
 }
 
 void Game::update() {
-	for (size_t i = 0; i < TEXTURE_COLS; ++i) {
-		for (size_t j = 0; j < TEXTURE_ROWS; ++j) {
+	for (int i = 0; i < TEXTURE_COLS; ++i) {
+		for (int j = 0; j < TEXTURE_ROWS; ++j) {
+			if (m_particles[j * TEXTURE_ROWS + i].m_latch == m_updateLatch) continue;
+			//flipLatch(i, j);
+
 			switch (m_particles[j * TEXTURE_ROWS + i].m_id) {
 			case EMPTY:
 				
@@ -57,43 +68,38 @@ void Game::update() {
 			case METAL:
 				updateMetal(i, j);
 				break;
+			case STEAM:
+				updateSteam(i, j);
+				break;
+			case TORCH:
+				updateTorch(i, j);
+				break;
 			}
+
+			// universal
+			updateTemp(i, j);
 		}
 	}
+
+	flipUpdateLatch();
 }
 
-void Game::addParticle() {
-	int scalex = static_cast<int>((m_mousex / (float)SCREEN_WIDTH) * TEXTURE_COLS);
-	// SDL mouse input has y increase at the bottom of window, so flip
-	int scaley = static_cast<int>((m_mousey / (float)SCREEN_HEIGHT) * TEXTURE_ROWS);
-	scaley = (TEXTURE_ROWS)- scaley;
+void Game::updateTemp(int _x, int _y) {
 
-	scalex = scalex >= TEXTURE_COLS ? TEXTURE_COLS - 1 : scalex;
-	scalex = scalex < 0 ? 0 : scalex;
-	scaley = scaley >= TEXTURE_ROWS ? TEXTURE_ROWS - 1 : scaley;
-	scaley = scaley < 0 ? 0 : scaley;
+	int cp_temp = 0;
+	int cp = 0;
+	for (int i = -1; i <= 1; ++i) {
+		for (int j = -1; j <= 1; ++j) {
+			if (!inBounds(_x + i, _y + j)) continue;
+			Particle p = m_particles[getIndex(_x + i, _y + j)];
 
-	//std::cout << scalex << " " << scaley << std::endl;
-
-	uint8_t c;
-	switch (m_particleChoice) {
-	case WALL:
-		addWall(scalex, scaley);
-		break;
-	case SAND:
-		addSand(scalex, scaley);
-		break;
-	case WATER:
-		addWater(scalex, scaley);
-		break;
-	case FIRE:
-		addFire(scalex, scaley);
-		break;
-	case METAL:
-		addMetal(scalex, scaley);
-	default:
-		break;
+			cp_temp += (p.m_specHeat * p.m_temp);
+			cp += p.m_specHeat;
+		}
 	}
+
+	int tempFinal = (float)cp_temp / cp < MAX_U16BIT ? (float)cp_temp / cp : MAX_U16BIT;
+	m_particles[getIndex(_x, _y)].m_temp = static_cast<uint16_t>(tempFinal);
 }
 
 void Game::updateSand(int _x, int _y) {
@@ -112,13 +118,13 @@ void Game::updateSand(int _x, int _y) {
 	} 
 
 	if (waterBottom) {
-		r = rand() % 3;
+		r = rand() % 15;
 		if(r > 0) pSwap(getIndex(_x, _y), getIndex(_x, _y - 1));
 		return;
 	}
 
 	if (coinFlip) {
-		r = rand() % 3;
+		r = rand() % 15;
 		if (waterBottomLeft) {
 			pSwap(getIndex(_x, _y), getIndex(_x - 1, _y - 1));
 			return;
@@ -140,109 +146,93 @@ void Game::updateSand(int _x, int _y) {
 }
 
 void Game::updateWater(int _x, int _y) {
-	int choice = rand() % 3;
+	if (m_particles[getIndex(_x, _y)].m_temp >= WATER_MAXTEMP) {
+		steam(_x, _y);
+		return;
+	}
+
 	bool emptyBottom = isEmpty(_x, _y - 1);
 	bool emptyBottomLeft = isEmpty(_x - 1, _y - 1);
 	bool emptyBottomRight = isEmpty(_x + 1, _y - 1);
+	bool emptyLeft = isEmpty(_x - 1, _y);
+	bool emptyRight = isEmpty(_x + 1, _y);
 
-	//if (emptyBottom || emptyBottomLeft || emptyBottomRight) {
-	//	pSwap(getIndex(_x, _y), getIndex(_x, _y - 1));
-	//	return;
-	//}
+	if (emptyBottom) {
+		pSwap(getIndex(_x, _y), getIndex(_x, _y - 1));
+		return;
+	}
 
-
-	if (choice == 0) {
-		if (isEmpty(_x - 1, _y)) {
+	int choice = rand() % 2;
+	switch (choice) {
+	case 0:
+		if(emptyBottomLeft)
+			pSwap(getIndex(_x, _y), getIndex(_x - 1, _y - 1));
+		else if(emptyLeft)
 			pSwap(getIndex(_x, _y), getIndex(_x - 1, _y));
-		}
-	} else if (choice == 1) {
-		if (isEmpty(_x + 1, _y)) {
+		break;
+	case 1:
+		if(emptyBottomRight)
+			pSwap(getIndex(_x, _y), getIndex(_x + 1, _y - 1));
+		else if(emptyRight)
 			pSwap(getIndex(_x, _y), getIndex(_x + 1, _y));
-		}
-	} else {
-		if (isEmpty(_x, _y - 1)) {
-			pSwap(getIndex(_x, _y), getIndex(_x, _y - 1));
-		}
+		break;
 	}
 }
 
 void Game::updateFire(int _x, int _y) {
-	if (m_particles[getIndex(_x, _y)].m_life <= 0) {
-		uint8_t c = static_cast<uint8_t>(m_dWall(m_randomGen));
-		m_particles[getIndex(_x, _y)].m_id = SMOKE;
-		m_particles[getIndex(_x, _y)].m_color.x = c - 5;
-		m_particles[getIndex(_x, _y)].m_color.y = c - 5;
-		m_particles[getIndex(_x, _y)].m_color.z = c - 5;
-		m_particles[getIndex(_x, _y)].m_life = 20;
+	if (m_particles[getIndex(_x, _y)].m_temp <= FIRE_MINTEMP) {
+		smoke(_x, _y);
 		return;
-	} else if (m_particles[getIndex(_x, _y)].m_life > 0){
-		--m_particles[getIndex(_x, _y)].m_life;
-		m_particles[getIndex(_x, _y)].m_temp = 220;
-	}
+	} 
+	int temp = m_particles[getIndex(_x, _y)].m_temp;
+	//m_particles[getIndex(_x, _y)].m_color.x = temp < 255 ? temp : 255;
+	//m_particles[getIndex(_x, _y)].m_color.z = temp
 
-	int choice = rand() % 10;
+	bool emptyTop = isEmpty(_x, _y + 1);
+	bool emptyTopLeft = isEmpty(_x - 1, _y + 1);
+	bool emptyTopRight = isEmpty(_x + 1, _y + 1);
+	bool emptyLeft = isEmpty(_x - 1, _y);
+	bool emptyRight = isEmpty(_x + 1, _y);
+	bool emptyBottomLeft = isEmpty(_x - 1, _y - 1);
+	bool emptyBottomRight = isEmpty(_x + 1, _y - 1);
+
+	int choice = m_dist(m_rg) % 3;
 	switch (choice) {
 	case 0:
-		if (isEmpty(_x - 1, _y + 1) || isSmoke(_x, _y)) {
+		if (emptyTopLeft)
 			pSwap(getIndex(_x, _y), getIndex(_x - 1, _y + 1));
-		} else if (!isEmpty(_x - 1, _y + 1) && isEmpty(_x - 1, _y)) {
+		else if (emptyLeft)
 			pSwap(getIndex(_x, _y), getIndex(_x - 1, _y));
-		}
 		break;
 	case 1:
-		if (isEmpty(_x + 1, _y + 1) || isSmoke(_x + 1, _y + 1)) {
+		if (emptyTopRight)
 			pSwap(getIndex(_x, _y), getIndex(_x + 1, _y + 1));
-		} else if (!isEmpty(_x + 1, _y + 1) && isEmpty(_x + 1, _y)) {
+		else if (emptyRight)
 			pSwap(getIndex(_x, _y), getIndex(_x + 1, _y));
-		}
 		break;
 	default:
-		if (isEmpty(_x, _y + 1) || isSmoke(_x, _y + 1)) {
+		if (emptyTop)
 			pSwap(getIndex(_x, _y), getIndex(_x, _y + 1));
+		else if (emptyBottomLeft)
+			pSwap(getIndex(_x, _y), getIndex(_x - 1, _y - 1));
+		else if (emptyBottomRight)
+			pSwap(getIndex(_x, _y), getIndex(_x + 1, _y - 1));
+
+		if (isSmoke(_x, _y + 1)) {
+			//swapEmpty(getIndex(_x, _y), getIndex(_x, _y + 1));
 		}
+
 		break;
 	}
-
-	if (!isEmpty(_x - 1, _y - 1)) {
-		avgTemps(getIndex(_x - 1, _y - 1), getIndex(_x, _y));
-	}
-
-	if (!isEmpty(_x, _y - 1)) {
-		avgTemps(getIndex(_x, _y - 1), getIndex(_x, _y));
-	}
-
-	if (!isEmpty(_x + 1, _y - 1)) {
-		avgTemps(getIndex(_x + 1, _y - 1), getIndex(_x, _y));
-	}
-
-	if (!isEmpty(_x - 1, _y)) {
-		avgTemps(getIndex(_x - 1, _y), getIndex(_x, _y));
-	}
-
-	if (!isEmpty(_x + 1, _y)) {
-		avgTemps(getIndex(_x + 1, _y), getIndex(_x, _y));
-	}
-
-	if (!isEmpty(_x - 1, _y + 1)) {
-		avgTemps(getIndex(_x - 1, _y + 1), getIndex(_x, _y));
-	}
-
-	if (!isEmpty(_x, _y + 1)) {
-		avgTemps(getIndex(_x, _y + 1), getIndex(_x, _y));
-	}
-
-	if (!isEmpty(_x + 1, _y + 1)) {
-		avgTemps(getIndex(_x + 1, _y + 1), getIndex(_x, _y));
-	}
-
 }
 
 void Game::updateSmoke(int _x, int _y) {
-	if (m_particles[getIndex(_x, _y)].m_life <= 0) {
+	if (m_particles[getIndex(_x, _y)].m_temp < SMOKE_MINTEMP) {
 		setEmpty(_x, _y);
 		return;
+	}  else if (m_particles[getIndex(_x, _y)].m_temp > FIRE_MINTEMP) {
+		fire(_x, _y);
 	} else {
-		--m_particles[getIndex(_x, _y)].m_life;
 		uint8_t c = m_particles[getIndex(_x, _y)].m_color.x;
 		c = c > 10 ? c - 10 : 10;
 		m_particles[getIndex(_x, _y)].m_color.x = c;
@@ -250,193 +240,236 @@ void Game::updateSmoke(int _x, int _y) {
 		m_particles[getIndex(_x, _y)].m_color.z = c;
 	}
 
+	bool emptyTop = isEmpty(_x, _y + 1);
+	bool emptyTopLeft = isEmpty(_x - 1, _y + 1);
+	bool emptyTopRight = isEmpty(_x + 1, _y + 1);
+	bool emptyLeft = isEmpty(_x - 1, _y);
+	bool emptyRight = isEmpty(_x + 1, _y);
+
+	if (emptyTop) {
+		pSwap(getIndex(_x, _y), getIndex(_x, _y + 1));
+		return;
+	}
+
 	int choice = rand() % 3;
 	switch (choice) {
 	case 0:
-		if (isEmpty(_x - 1, _y + 1)) {
+		if (emptyLeft)
+			pSwap(getIndex(_x, _y), getIndex(_x - 1, _y ));
+		else if (emptyTopLeft)
 			pSwap(getIndex(_x, _y), getIndex(_x - 1, _y + 1));
-		} else if (isEmpty(_x - 1, _y)) {
-			pSwap(getIndex(_x, _y), getIndex(_x - 1, _y));
-		}
 		break;
 	case 1:
-		if (isEmpty(_x + 1, _y + 1)) {
-			pSwap(getIndex(_x, _y), getIndex(_x + 1, _y + 1));
-		} else if (isEmpty(_x + 1, _y)) {
+		if (emptyRight)
 			pSwap(getIndex(_x, _y), getIndex(_x + 1, _y));
-		}
+		else if (emptyTopRight)
+			pSwap(getIndex(_x, _y), getIndex(_x + 1, _y + 1));
 		break;
 	default:
-		if (isEmpty(_x, _y + 1)) {
-			pSwap(getIndex(_x, _y), getIndex(_x, _y + 1));
-		}
 		break;
 	}
 }
 
 void Game::updateMetal(int _x, int _y) {
-	bool metalBottom = getId(_x, _y - 1) == METAL;
-	bool metalBottomLeft = getId(_x - 1, _y - 1) == METAL;
-	bool metalBottomRight = getId(_x + 1, _y - 1) == METAL;
-	bool metalLeft = getId(_x - 1, _y) == METAL;
-	bool metalRight = getId(_x + 1, _y) == METAL;
-	bool metalTopLeft = getId(_x - 1, _y + 1) == METAL;
-	bool metalTop = getId(_x, _y + 1) == METAL;
-	bool metalTopRight = getId(_x + 1, _y + 1) == METAL;
+	int temp = m_particles[getIndex(_x, _y)].m_temp - METAL_BASETEMP;
 
-	uint8_t temp = m_particles[getIndex(_x, _y)].m_temp;
-	uint8_t c = m_particles[getIndex(_x, _y)].m_color.x;
-	//m_particles[getIndex(_x, _y)].m_color.x = mymath::min(mymath::abs(c + 0.1 * temp), 255);
-	//m_particles[getIndex(_x, _y)].m_color.y = mymath::min(mymath::abs(c - 0.1 * temp), 255);
-	//m_particles[getIndex(_x, _y)].m_color.z = mymath::min(mymath::abs(c - 0.1 * temp), 255);
 
-	uint8_t nTemp;
-	if (metalBottom) {
-		nTemp = static_cast<uint8_t>(
-			(temp + m_particles[getIndex(_x, _y - 1)].m_temp) / 2);
-		m_particles[getIndex(_x, _y)].m_temp = nTemp;
-		m_particles[getIndex(_x, _y - 1)].m_temp = nTemp;
+	if (temp < 100) {
+		m_particles[getIndex(_x, _y)].m_color.x = 70 + temp;
+	} else {
+		m_particles[getIndex(_x, _y)].m_color.x = 70 + temp;
+		m_particles[getIndex(_x, _y)].m_color.y = 70 + temp;
+		m_particles[getIndex(_x, _y)].m_color.z = 70 + temp;
 	}
-
-	if (metalBottomLeft) {
-		nTemp = static_cast<uint8_t>(
-			(temp + m_particles[getIndex(_x - 1, _y - 1)].m_temp) / 2);
-		m_particles[getIndex(_x, _y)].m_temp = nTemp;
-		m_particles[getIndex(_x - 1, _y - 1)].m_temp = nTemp;
-	}
-
-	if (metalBottomRight) {
-		nTemp = static_cast<uint8_t>(
-			(temp + m_particles[getIndex(_x + 1, _y - 1)].m_temp) / 2);
-		m_particles[getIndex(_x, _y)].m_temp = nTemp;
-		m_particles[getIndex(_x + 1, _y - 1)].m_temp = nTemp;
-	}
-
-	if (metalLeft) {
-		nTemp = static_cast<uint8_t>(
-			(temp + m_particles[getIndex(_x - 1, _y)].m_temp) / 2);
-		m_particles[getIndex(_x, _y)].m_temp = nTemp;
-		m_particles[getIndex(_x - 1, _y)].m_temp = nTemp;
-	}
-
-	if (metalRight) {
-		nTemp = static_cast<uint8_t>(
-			(temp + m_particles[getIndex(_x + 1, _y)].m_temp) / 2);
-		m_particles[getIndex(_x, _y)].m_temp = nTemp;
-		m_particles[getIndex(_x + 1, _y)].m_temp = nTemp;
-	}
-
-	if (metalTopLeft) {
-		nTemp = static_cast<uint8_t>(
-			(temp + m_particles[getIndex(_x - 1, _y + 1)].m_temp) / 2);
-		m_particles[getIndex(_x, _y)].m_temp = nTemp;
-		m_particles[getIndex(_x - 1, _y + 1)].m_temp = nTemp;
-	}
-
-	if (metalTop) {
-		nTemp = static_cast<uint8_t>(
-			(temp + m_particles[getIndex(_x, _y + 1)].m_temp) / 2);
-		m_particles[getIndex(_x, _y)].m_temp = nTemp;
-		m_particles[getIndex(_x, _y + 1)].m_temp = nTemp;
-	}
-
-	if (metalTopRight) {
-		nTemp = static_cast<uint8_t>(
-			(temp + m_particles[getIndex(_x + 1, _y + 1)].m_temp) / 2);
-		m_particles[getIndex(_x, _y)].m_temp = nTemp;
-		m_particles[getIndex(_x + 1, _y + 1)].m_temp = nTemp;
-	}
-
-	// do some equilibrium
-	uint8_t t = m_particles[getIndex(_x, _y)].m_temp;
-	t = t > 70 ? t - 1 : 70;
-	m_particles[getIndex(_x, _y)].m_temp = t;
-	m_particles[getIndex(_x, _y)].m_color.x = t;
 
 }
 
-void Game::pSwap(size_t _idx1, size_t _idx2) {
-	Particle tmp = m_particles[_idx1];
+void Game::updateSteam(int _x, int _y) {
+	if (m_particles[getIndex(_x, _y)].m_temp < WATER_BASETEMP) {
+		water(_x, _y);
+		return;
+	}
 
-	m_particles[_idx1].m_id = m_particles[_idx2].m_id;
-	m_particles[_idx1].m_color = m_particles[_idx2].m_color;
-	m_particles[_idx1].m_life = m_particles[_idx2].m_life;
-	m_particles[_idx1].m_temp = m_particles[_idx2].m_temp;
+	int choice = rand() % 5;
+	switch (choice) {
+	case 0:
+		if (isEmpty(_x, _y + 1) || isSmoke(_x, _y + 1) || isWater(_x, _y + 1)) {
+			pSwap(getIndex(_x, _y), getIndex(_x, _y + 1));
+		}
+		break;
+	case 1:
+	case 2:
+		if (isEmpty(_x - 1, _y + 1) || isSmoke(_x, _y) || isWater(_x, _y)) {
+			pSwap(getIndex(_x, _y), getIndex(_x - 1, _y + 1));
+		} else if (!isEmpty(_x - 1, _y + 1) && isEmpty(_x - 1, _y)) {
+			pSwap(getIndex(_x, _y), getIndex(_x - 1, _y));
+		}
+		break;
+	case 3:
+	case 4:
+		if (isEmpty(_x + 1, _y + 1) || isSmoke(_x + 1, _y + 1) || isWater(_x + 1, _y + 1)) {
+			pSwap(getIndex(_x, _y), getIndex(_x + 1, _y + 1));
+		} else if (!isEmpty(_x + 1, _y + 1) && isEmpty(_x + 1, _y)) {
+			pSwap(getIndex(_x, _y), getIndex(_x + 1, _y));
+		}
+		break;
+	}
+}
 
-	m_particles[_idx2].m_id = tmp.m_id;
-	m_particles[_idx2].m_color = tmp.m_color;
-	m_particles[_idx2].m_life = tmp.m_life;
-	m_particles[_idx2].m_temp = tmp.m_temp;
+void Game::updateTorch(int _x, int _y) {
+	if (isEmpty(_x - 1, _y + 1))
+		fire(_x - 1, _y + 1);
+	if (isEmpty(_x, _y + 1))
+		fire(_x, _y + 1);
+	if (isEmpty(_x + 1, _y + 1))
+		fire(_x + 1, _y + 1);
+	if (isEmpty(_x - 1, _y))
+		fire(_x - 1, _y);
+	if (isEmpty(_x + 1, _y))
+		fire(_x + 1, _y);
+	if (isEmpty(_x - 1, _y - 1))
+		fire(_x - 1, _y - 1);
+	if (isEmpty(_x, _y - 1))
+		fire(_x, _y - 1);
+	if (isEmpty(_x + 1, _y - 1))
+		fire(_x + 1, _y - 1);
 }
 
 void Game::setEmpty(int _x, int _y) {
 	m_particles[getIndex(_x, _y)].m_id = EMPTY;
-	m_particles[getIndex(_x, _y)].m_life = 255;
+	m_particles[getIndex(_x, _y)].m_specHeat = EMPTY_SPECIFICHEAT;
+	m_particles[getIndex(_x, _y)].m_temp = EMPTY_BASETEMP;
 	m_particles[getIndex(_x, _y)].m_color.x = 0;
 	m_particles[getIndex(_x, _y)].m_color.y = 0;
 	m_particles[getIndex(_x, _y)].m_color.z = 0;
 }
 
-void Game::addWall(int _x, int _y) {
+void Game::brush() {
+	int scalex = static_cast<int>((m_mousex / (float)SCREEN_WIDTH) * TEXTURE_COLS);
+	// SDL mouse input has y increase at the bottom of window, so flip
+	int scaley = static_cast<int>((m_mousey / (float)SCREEN_HEIGHT) * TEXTURE_ROWS);
+	scaley = (TEXTURE_ROWS) - scaley;
+
+	scalex = scalex >= TEXTURE_COLS ? TEXTURE_COLS - 1 : scalex;
+	int x = scalex < 0 ? 0 : scalex;
+	scaley = scaley >= TEXTURE_ROWS ? TEXTURE_ROWS - 1 : scaley;
+	int y = scaley < 0 ? 0 : scaley;
+
 	uint8_t c;
-	for (int i = -1; i <= 1; ++i) {
-		for (int j = -1; j <= 1; ++j) {
-			c = static_cast<uint8_t>(m_dWall(m_randomGen));
-			m_particles[getIndex(_x + i, _y + j)].m_id = WALL;
-			m_particles[getIndex(_x + i, _y + j)].m_color.x = c;
-			m_particles[getIndex(_x + i, _y + j)].m_color.y = c;
-			m_particles[getIndex(_x + i, _y + j)].m_color.z = c;
+	int halfBrush = (int)(m_brushSize / 2);
+	for (int i = -halfBrush; i <= halfBrush; ++i) {
+		for (int j = -halfBrush; j <= halfBrush; ++j) {
+			if (!inBounds(x + i, y + j)) continue;
+
+			switch (m_particleChoice) {
+			case EMPTY:
+
+				break;
+			case WALL:
+				wall(x + i, y + j);
+				break;
+			case SAND:
+				sand(x + i, y + j);
+				break;
+			case WATER:
+				water(x + i, y + j);
+				break;
+			case FIRE:
+				fire(x + i, y + j);
+				break;
+			case SMOKE:
+				smoke(x + i, y + j);
+				break;
+			case METAL:
+				metal(x + i, y + j);
+				break;
+			case STEAM:
+				steam(x + i, y + j);
+				break;
+			case TORCH:
+				torch(x + i, y + j);
+				break;
+			default:
+				break;
+			}
 		}
 	}
 }
 
-void Game::addSand(int _x, int _y) {
-	uint8_t c;
-	for (int i = -1; i <= 1; ++i) {
-		for (int j = -1; j <= 1; ++j) {
-			c = static_cast<uint8_t>(m_dSand(m_randomGen));
-			m_particles[getIndex(_x + i, _y + j)].m_id = SAND;
-			m_particles[getIndex(_x + i, _y + j)].m_color.x = c + 50;
-			m_particles[getIndex(_x + i, _y + j)].m_color.y = c;
-		}
-	}
+void Game::wall(int _x, int _y) {
+	uint8_t c = static_cast<uint8_t>(m_dWall(m_rg));
+	m_particles[getIndex(_x, _y)].m_id = WALL;
+	m_particles[getIndex(_x, _y)].m_specHeat = WALL_SPECIFICHEAT;
+	m_particles[getIndex(_x, _y)].m_temp = WALL_BASETEMP;
+	m_particles[getIndex(_x, _y)].m_color.x = c;
+	m_particles[getIndex(_x, _y)].m_color.y = c;
+	m_particles[getIndex(_x, _y)].m_color.z = c;
 }
 
-void Game::addWater(int _x, int _y) {
-	uint8_t c;
-	for (int i = -1; i <= 1; ++i) {
-		for (int j = -1; j <= 1; ++j) {
-			c = static_cast<uint8_t>(m_dWater(m_randomGen));
-			m_particles[getIndex(_x + i, _y+ j)].m_id = WATER;
-			m_particles[getIndex(_x + i, _y+ j)].m_color.z = c;
-		}
-	}
+void Game::sand(int _x, int _y) {
+	uint8_t c = static_cast<uint8_t>(m_dSand(m_rg));
+	m_particles[getIndex(_x, _y)].m_id = SAND;
+	m_particles[getIndex(_x, _y)].m_specHeat = SAND_SPECIFICHEAT;
+	m_particles[getIndex(_x, _y)].m_temp = SAND_BASETEMP;
+	m_particles[getIndex(_x, _y)].m_color.x = c + 50;
+	m_particles[getIndex(_x, _y)].m_color.y = c;
+	m_particles[getIndex(_x, _y)].m_color.z = 20;
 }
 
-void Game::addFire(int _x, int _y) {
-	uint8_t c;
-	for (int i = -1; i <= 1; ++i) {
-		for (int j = -1; j <= 1; ++j) {
-			c = static_cast<uint8_t>(m_dFire(m_randomGen));
-			m_particles[getIndex(_x + i, _y + j)].m_id = FIRE;
-			m_particles[getIndex(_x + i, _y + j)].m_life = 15;
-			m_particles[getIndex(_x + i, _y + j)].m_color.x = c + 120;
-			m_particles[getIndex(_x + i, _y + j)].m_color.y = c;
-			m_particles[getIndex(_x + i, _y + j)].m_temp = 220;
-		}
-	}
+void Game::water(int _x, int _y) {
+	uint8_t c = static_cast<uint8_t>(m_dWater(m_rg));
+	m_particles[getIndex(_x, _y)].m_id = WATER;
+	m_particles[getIndex(_x, _y)].m_specHeat = WATER_SPECIFICHEAT;
+	m_particles[getIndex(_x, _y)].m_temp = WATER_BASETEMP;
+	m_particles[getIndex(_x, _y)].m_color.x = 20;
+	m_particles[getIndex(_x, _y)].m_color.y = 20;
+	m_particles[getIndex(_x, _y)].m_color.z = c;
 }
 
-void Game::addMetal(int _x, int _y) {
-	uint8_t c;
-	for (int i = -1; i <= 1; ++i) {
-		for (int j = -1; j <= 1; ++j) {
-			c = static_cast<uint8_t>(m_dWall(m_randomGen));
-			m_particles[getIndex(_x + i, _y + j)].m_id = METAL;
-			m_particles[getIndex(_x + i, _y + j)].m_color.x = 70;
-			m_particles[getIndex(_x + i, _y + j)].m_color.y = 70;
-			m_particles[getIndex(_x + i, _y + j)].m_color.z = 70;
-			m_particles[getIndex(_x + i, _y + j)].m_temp = 70;
-		}
-	}
+void Game::fire(int _x, int _y) {
+	uint8_t c = static_cast<uint8_t>(m_dFire(m_rg));
+	m_particles[getIndex(_x, _y)].m_id = FIRE;
+	m_particles[getIndex(_x, _y)].m_specHeat = FIRE_SPECIFICHEAT;
+	m_particles[getIndex(_x, _y)].m_temp = FIRE_BASETEMP;
+	m_particles[getIndex(_x, _y)].m_color.x = 150;
+	m_particles[getIndex(_x, _y)].m_color.y = 150;
+	m_particles[getIndex(_x, _y)].m_color.y = 10;
+}
+
+void Game::smoke(int _x, int _y) {
+	uint8_t c = static_cast<uint8_t>(m_dWall(m_rg));
+	m_particles[getIndex(_x, _y)].m_id = SMOKE;
+	m_particles[getIndex(_x, _y)].m_specHeat = SMOKE_SPECIFICHEAT;
+	m_particles[getIndex(_x, _y)].m_temp = SMOKE_BASETEMP;
+	m_particles[getIndex(_x, _y)].m_color.x = c - 5;
+	m_particles[getIndex(_x, _y)].m_color.y = c - 5;
+	m_particles[getIndex(_x, _y)].m_color.z = c - 5;
+}
+
+void Game::metal(int _x, int _y) {
+	uint8_t c = static_cast<uint8_t>(m_dWall(m_rg));
+	m_particles[getIndex(_x, _y)].m_id = METAL;
+	m_particles[getIndex(_x, _y)].m_specHeat = METAL_SPECIFICHEAT;
+	m_particles[getIndex(_x, _y)].m_temp = METAL_BASETEMP;
+	m_particles[getIndex(_x, _y)].m_color.x = 70;
+	m_particles[getIndex(_x, _y)].m_color.y = 70;
+	m_particles[getIndex(_x, _y)].m_color.z = 70;
+}
+
+void Game::steam(int _x, int _y) {
+	m_particles[getIndex(_x, _y)].m_id = STEAM;
+	m_particles[getIndex(_x, _y)].m_specHeat = STEAM_SPEFICHEAT;
+	m_particles[getIndex(_x, _y)].m_temp = STEAM_BASETEMP;
+	m_particles[getIndex(_x, _y)].m_color.x = 100;
+	m_particles[getIndex(_x, _y)].m_color.y = 100;
+	m_particles[getIndex(_x, _y)].m_color.z = 180;
+}
+
+void Game::torch(int _x, int _y) {
+	m_particles[getIndex(_x, _y)].m_id = TORCH;
+	m_particles[getIndex(_x, _y)].m_specHeat = TORCH_SPECIFICHEAT;
+	m_particles[getIndex(_x, _y)].m_temp = TORCH_BASETEMP;
+	m_particles[getIndex(_x, _y)].m_color.x = 150;
+	m_particles[getIndex(_x, _y)].m_color.y = 150;
+	m_particles[getIndex(_x, _y)].m_color.z = 0;
 }
