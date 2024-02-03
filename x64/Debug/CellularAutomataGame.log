@@ -1,4 +1,24 @@
-﻿  Game.cpp
-C:\Users\liamd\OneDrive\Documents\Visual Studio Projects\CellularAutomataGame\Game.cpp(101,16): warning C4244: 'initializing': conversion from 'float' to 'int', possible loss of data
-C:\Users\liamd\OneDrive\Documents\Visual Studio Projects\CellularAutomataGame\Game.cpp(358,10): warning C4101: 'c': unreferenced local variable
+﻿  Controller.cpp
+C:\Users\liamd\OneDrive\Documents\Visual Studio Projects\CellularAutomataGame\MyVectors.hpp(56,18): warning C4244: 'argument': conversion from 'uint16_t' to 'uint8_t', possible loss of data
+  (compiling source file 'Controller.cpp')
+  
+  Game.cpp
+C:\Users\liamd\OneDrive\Documents\Visual Studio Projects\CellularAutomataGame\MyVectors.hpp(56,18): warning C4244: 'argument': conversion from 'uint16_t' to 'uint8_t', possible loss of data
+  (compiling source file 'Game.cpp')
+  
+C:\Users\liamd\OneDrive\Documents\Visual Studio Projects\CellularAutomataGame\Game.cpp(184,15): warning C4244: 'initializing': conversion from 'uint16_t' to 'uint8_t', possible loss of data
+  View.cpp
+C:\Users\liamd\OneDrive\Documents\Visual Studio Projects\CellularAutomataGame\MyVectors.hpp(56,18): warning C4244: 'argument': conversion from 'uint16_t' to 'uint8_t', possible loss of data
+  (compiling source file 'View.cpp')
+  
+  main.cpp
+C:\Users\liamd\OneDrive\Documents\Visual Studio Projects\CellularAutomataGame\MyVectors.hpp(56,18): warning C4244: 'argument': conversion from 'uint16_t' to 'uint8_t', possible loss of data
+  (compiling source file 'main.cpp')
+  
+C:\Users\liamd\OneDrive\Documents\Visual Studio Projects\CellularAutomataGame\main.cpp(18,11): warning C4244: 'initializing': conversion from '_Rep' to 'int', possible loss of data
+C:\Users\liamd\OneDrive\Documents\Visual Studio Projects\CellularAutomataGame\main.cpp(18,11): warning C4244:         with
+C:\Users\liamd\OneDrive\Documents\Visual Studio Projects\CellularAutomataGame\main.cpp(18,11): warning C4244:         [
+C:\Users\liamd\OneDrive\Documents\Visual Studio Projects\CellularAutomataGame\main.cpp(18,11): warning C4244:             _Rep=__int64
+C:\Users\liamd\OneDrive\Documents\Visual Studio Projects\CellularAutomataGame\main.cpp(18,11): warning C4244:         ]
+  Generating Code...
   CellularAutomataGame.vcxproj -> C:\Users\liamd\OneDrive\Documents\Visual Studio Projects\CellularAutomataGame\x64\Debug\CellularAutomataGame.exe

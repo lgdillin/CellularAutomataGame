@@ -51,15 +51,16 @@ void View::repaint() {
 }
 
 void View::updateTexture() {
+	std::vector<Particle> *ptr = m_game->m_rPtr;
 	for (int i = 0; i < TEXTURE_ROWS * TEXTURE_COLS; ++i) {
-		if (m_game->m_particles[i].m_id == EMPTY) {
+		if ((*ptr)[i].m_id == EMPTY) {
 			m_pColors[3 * i] = 0;
 			m_pColors[3 * i + 1] = 0;
 			m_pColors[3 * i + 2] = 0;
 		} else {
-			m_pColors[3 * i] = m_game->m_particles[i].m_color.x;
-			m_pColors[3 * i + 1] = m_game->m_particles[i].m_color.y;
-			m_pColors[3 * i + 2] = m_game->m_particles[i].m_color.z;
+			m_pColors[3 * i] = (*ptr)[i].m_color.x;
+			m_pColors[3 * i + 1] = (*ptr)[i].m_color.y;
+			m_pColors[3 * i + 2] = (*ptr)[i].m_color.z;
 		}
 	}
 
@@ -145,11 +146,12 @@ void View::initialize() {
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
+	std::vector<Particle> *ptr = m_game->m_rPtr;
 	for (int i = 0; i < TEXTURE_ROWS * TEXTURE_COLS; ++i) {
-		Particle p = m_game->m_particles[i];
-		m_pColors[3 * i] = m_game->m_particles[i].m_color.x;
-		m_pColors[3 * i + 1] = m_game->m_particles[i].m_color.y;
-		m_pColors[3 * i + 2] = m_game->m_particles[i].m_color.z;
+		Particle p = (*ptr)[i];
+		m_pColors[3 * i] = (*ptr)[i].m_color.x;
+		m_pColors[3 * i + 1] = (*ptr)[i].m_color.y;
+		m_pColors[3 * i + 2] = (*ptr)[i].m_color.z;
 	}
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, TEXTURE_COLS, TEXTURE_ROWS, 
 		0, GL_RGB, GL_UNSIGNED_BYTE, m_pColors.data());
