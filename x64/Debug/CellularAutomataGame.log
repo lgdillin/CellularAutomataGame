@@ -1,21 +1,55 @@
 ﻿  Game.cpp
-C:\Users\liamd\OneDrive\Documents\Visual Studio Projects\CellularAutomataGame\MyVectors.hpp(56,18): warning C4244: 'argument': conversion from 'uint16_t' to 'uint8_t', possible loss of data
+C:\Users\liamd\OneDrive\Documents\Visual Studio Projects\CellularAutomataGame\MyVectors.hpp(60,18): warning C4244: 'argument': conversion from 'uint16_t' to 'uint8_t', possible loss of data
   (compiling source file 'Game.cpp')
   
-C:\Users\liamd\OneDrive\Documents\Visual Studio Projects\CellularAutomataGame\Game.cpp(160,27): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
-C:\Users\liamd\OneDrive\Documents\Visual Studio Projects\CellularAutomataGame\Game.cpp(277,15): warning C4244: 'initializing': conversion from 'uint16_t' to 'uint8_t', possible loss of data
-  main.cpp
-C:\Users\liamd\OneDrive\Documents\Visual Studio Projects\CellularAutomataGame\MyVectors.hpp(56,18): warning C4244: 'argument': conversion from 'uint16_t' to 'uint8_t', possible loss of data
-  (compiling source file 'main.cpp')
+C:\Users\liamd\OneDrive\Documents\Visual Studio Projects\CellularAutomataGame\Game.cpp(119,44): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\liamd\OneDrive\Documents\Visual Studio Projects\CellularAutomataGame\Game.cpp(213,15): warning C4244: 'initializing': conversion from 'uint16_t' to 'uint8_t', possible loss of data
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include\utility(250,16): warning C4267: 'initializing': conversion from 'size_t' to '_Ty1', possible loss of data
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include\utility(250,16): warning C4267:         with
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include\utility(250,16): warning C4267:         [
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include\utility(250,16): warning C4267:             _Ty1=int
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include\utility(250,16): warning C4267:         ]
+  (compiling source file 'Game.cpp')
+  C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include\utility(250,16):
+  the template instantiation context (the oldest one first) is
+  	C:\Users\liamd\OneDrive\Documents\Visual Studio Projects\CellularAutomataGame\Game.hpp(155,12):
+  	see reference to function template instantiation '_Ty &std::vector<_Ty,std::allocator<_Ty>>::emplace_back<size_t,size_t>(size_t &&,size_t &&)' being compiled
+          with
+          [
+              _Ty=std::pair<int,int>
+          ]
+  	C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include\vector(862,24):
+  	see reference to function template instantiation '_Ty &std::vector<_Ty,std::allocator<_Ty>>::_Emplace_one_at_back<unsigned __int64,unsigned __int64>(unsigned __int64 &&,unsigned __int64 &&)' being compiled
+          with
+          [
+              _Ty=std::pair<int,int>
+          ]
+  	C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include\vector(780,20):
+  	see reference to function template instantiation '_Ty &std::vector<_Ty,std::allocator<_Ty>>::_Emplace_back_with_unused_capacity<unsigned __int64,unsigned __int64>(unsigned __int64 &&,unsigned __int64 &&)' being compiled
+          with
+          [
+              _Ty=std::pair<int,int>
+          ]
+  	C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include\vector(795,13):
+  	see reference to function template instantiation 'void std::_Construct_in_place<std::pair<int,int>,_Ty,_Ty>(std::pair<int,int> &,_Ty &&,_Ty &&) noexcept' being compiled
+          with
+          [
+              _Ty=size_t
+          ]
+  	C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include\xutility(255,61):
+  	see reference to function template instantiation 'std::pair<int,int>::pair<_Ty,_Ty,0>(_Other1 &&,_Other2 &&) noexcept' being compiled
+          with
+          [
+              _Ty=size_t,
+              _Other1=size_t,
+              _Other2=size_t
+          ]
   
-C:\Users\liamd\OneDrive\Documents\Visual Studio Projects\CellularAutomataGame\main.cpp(18,11): warning C4244: 'initializing': conversion from '_Rep' to 'int', possible loss of data
-C:\Users\liamd\OneDrive\Documents\Visual Studio Projects\CellularAutomataGame\main.cpp(18,11): warning C4244:         with
-C:\Users\liamd\OneDrive\Documents\Visual Studio Projects\CellularAutomataGame\main.cpp(18,11): warning C4244:         [
-C:\Users\liamd\OneDrive\Documents\Visual Studio Projects\CellularAutomataGame\main.cpp(18,11): warning C4244:             _Rep=__int64
-C:\Users\liamd\OneDrive\Documents\Visual Studio Projects\CellularAutomataGame\main.cpp(18,11): warning C4244:         ]
-  View.cpp
-C:\Users\liamd\OneDrive\Documents\Visual Studio Projects\CellularAutomataGame\MyVectors.hpp(56,18): warning C4244: 'argument': conversion from 'uint16_t' to 'uint8_t', possible loss of data
-  (compiling source file 'View.cpp')
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include\utility(250,54): warning C4267: 'initializing': conversion from 'size_t' to '_Ty2', possible loss of data
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include\utility(250,54): warning C4267:         with
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include\utility(250,54): warning C4267:         [
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include\utility(250,54): warning C4267:             _Ty2=int
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include\utility(250,54): warning C4267:         ]
+  (compiling source file 'Game.cpp')
   
-  Generating Code...
   CellularAutomataGame.vcxproj -> C:\Users\liamd\OneDrive\Documents\Visual Studio Projects\CellularAutomataGame\x64\Debug\CellularAutomataGame.exe

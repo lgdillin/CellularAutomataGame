@@ -51,7 +51,8 @@ void View::repaint() {
 }
 
 void View::updateTexture() {
-	std::vector<Particle> *ptr = m_game->m_rPtr;
+	//std::vector<Particle> *ptr = m_game->m_rPtr;
+	std::vector<Particle> *ptr = &m_game->m_particles;
 	for (int i = 0; i < TEXTURE_ROWS * TEXTURE_COLS; ++i) {
 		if ((*ptr)[i].m_id == EMPTY) {
 			m_pColors[3 * i] = 0;
@@ -146,7 +147,8 @@ void View::initialize() {
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
-	std::vector<Particle> *ptr = m_game->m_rPtr;
+	//std::vector<Particle> *ptr = m_game->m_rPtr;
+	std::vector<Particle> *ptr = &m_game->m_particles;
 	for (int i = 0; i < TEXTURE_ROWS * TEXTURE_COLS; ++i) {
 		Particle p = (*ptr)[i];
 		m_pColors[3 * i] = (*ptr)[i].m_color.x;

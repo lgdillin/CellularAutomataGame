@@ -26,12 +26,16 @@ public:
 
 	void update();
 	void update2();
-	void update3();
+	void commitUpdate();
 
 	//void updateTemp(int _x, int _y);
 
+	void updateSand2(int _x, int _y);
 	void updateSand(int _x, int _y);
+
+	void updateWater2(int _x, int _y);
 	void updateWater(int _x, int _y);
+
 	void updateFire(int _x, int _y);
 	void updateSmoke(int _x, int _y);
 	void updateMetal(int _x, int _y);
@@ -62,7 +66,10 @@ public:
 	std::vector<Particle> *m_wPtr;
 	std::vector<Particle> *m_rPtr;
 	std::pair<std::vector<Particle>, std::vector<Particle>> m_pBuffers;
+	std::vector<Particle> m_particles;
 	uint8_t m_bufferWriteMode;
+	std::vector<std::pair<int, int>> m_changes;
+
 	std::mt19937 m_rg;
 	std::uniform_int_distribution<int> m_dist;
 	std::uniform_int_distribution<int> m_dWall;
@@ -112,6 +119,10 @@ public:
 		return m_bufferWriteMode == 1 ? &m_pBuffers.first : &m_pBuffers.second;
 	}
 
+	void setParticle(int _x, int _y) {
+
+	}
+
 	size_t getIndex(int _x, int _y) {
 		return size_t(TEXTURE_COLS * _y + _x);
 	}
@@ -125,19 +136,23 @@ public:
 	}
 
 	bool isEmpty(int _x, int _y) {
-		return inBounds(_x, _y) && (*m_rPtr)[getIndex(_x, _y)].m_id == EMPTY;
+		return inBounds(_x, _y) && m_particles[getIndex(_x, _y)].m_id == EMPTY;
 	}
 
 	bool isWater(int _x, int _y) {
-		return inBounds(_x, _y) && (*m_rPtr)[getIndex(_x, _y)].m_id == WATER;
+		return inBounds(_x, _y) && m_particles[getIndex(_x, _y)].m_id == WATER;
 	}
 
 	bool isSmoke(int _x, int _y) {
-		return inBounds(_x, _y) && (*m_rPtr)[getIndex(_x, _y)].m_id == SMOKE;
+		return inBounds(_x, _y) && m_particles[getIndex(_x, _y)].m_id == SMOKE;
 	}
 
 	uint8_t getId(int _x, int _y) {
 		return (*m_rPtr)[getIndex(_x, _y)].m_id;
+	}
+
+	void storeChange(int _x1, int _y1, int _x2, int _y2) {
+		m_changes.emplace_back(getIndex(_x1, _y1), getIndex(_x2, _y2));
 	}
 
 	void noSwapUpdate(size_t _idx) {
@@ -186,23 +201,19 @@ public:
 	}
 
 	void pSwap(size_t _idx1, size_t _idx2) {
-		//if ((*m_wPtr)[_idx1].m_id == EMPTY) {
-			(*m_wPtr)[_idx1].m_id = (*m_rPtr)[_idx2].m_id;
-			(*m_wPtr)[_idx1].m_color.x = (*m_rPtr)[_idx2].m_color.x;
-			(*m_wPtr)[_idx1].m_color.y = (*m_rPtr)[_idx2].m_color.y;
-			(*m_wPtr)[_idx1].m_color.z = (*m_rPtr)[_idx2].m_color.z;
-			(*m_wPtr)[_idx1].m_temp = (*m_rPtr)[_idx2].m_temp;
-			(*m_wPtr)[_idx1].m_tdiff = (*m_rPtr)[_idx2].m_tdiff;
-		//}
+		(*m_wPtr)[_idx1].m_id = (*m_rPtr)[_idx2].m_id;
+		(*m_wPtr)[_idx1].m_color.x = (*m_rPtr)[_idx2].m_color.x;
+		(*m_wPtr)[_idx1].m_color.y = (*m_rPtr)[_idx2].m_color.y;
+		(*m_wPtr)[_idx1].m_color.z = (*m_rPtr)[_idx2].m_color.z;
+		(*m_wPtr)[_idx1].m_temp = (*m_rPtr)[_idx2].m_temp;
+		(*m_wPtr)[_idx1].m_tdiff = (*m_rPtr)[_idx2].m_tdiff;
 
-		//if ((*m_wPtr)[_idx2].m_id == EMPTY) {
-			(*m_wPtr)[_idx2].m_id = (*m_rPtr)[_idx1].m_id;
-			(*m_wPtr)[_idx2].m_color.x = (*m_rPtr)[_idx1].m_color.x;
-			(*m_wPtr)[_idx2].m_color.y = (*m_rPtr)[_idx1].m_color.y;
-			(*m_wPtr)[_idx2].m_color.z = (*m_rPtr)[_idx1].m_color.z;
-			(*m_wPtr)[_idx2].m_temp = (*m_rPtr)[_idx1].m_temp;
-			(*m_wPtr)[_idx2].m_tdiff = (*m_rPtr)[_idx1].m_tdiff;
-		//}
+		(*m_wPtr)[_idx2].m_id = (*m_rPtr)[_idx1].m_id;
+		(*m_wPtr)[_idx2].m_color.x = (*m_rPtr)[_idx1].m_color.x;
+		(*m_wPtr)[_idx2].m_color.y = (*m_rPtr)[_idx1].m_color.y;
+		(*m_wPtr)[_idx2].m_color.z = (*m_rPtr)[_idx1].m_color.z;
+		(*m_wPtr)[_idx2].m_temp = (*m_rPtr)[_idx1].m_temp;
+		(*m_wPtr)[_idx2].m_tdiff = (*m_rPtr)[_idx1].m_tdiff;
 	}
 
 	void swapEmpty(size_t _idx1, size_t _idx2) {
