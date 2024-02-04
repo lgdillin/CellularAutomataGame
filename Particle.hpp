@@ -16,7 +16,7 @@ class Particle {
 public:
 	Particle() {
 		m_id = EMPTY;
-		m_updated = 0;
+		m_moves = std::byte{ 0b00000000 };
 		m_tdiff = EMPTY_TDIFF;
 		m_temp = EMPTY_BASETEMP;
 		m_color = { 0, 0, 0 };
@@ -27,8 +27,7 @@ public:
 
 
 	std::uint8_t m_id;
-	std::uint8_t m_updated;
-	//std::uint16_t m_specHeat;
+	std::byte m_moves;
 	std::uint16_t m_tdiff;
 	std::uint16_t m_temp;
 	vec::vec3u8 m_color;

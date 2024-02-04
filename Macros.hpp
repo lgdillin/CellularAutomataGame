@@ -1,6 +1,9 @@
 #pragma once
 
+#include <iostream>
 #include <array>
+#include <bitset>
+#include <cstddef>
 
 #define SCREEN_WIDTH 800
 #define SCREEN_HEIGHT 600
@@ -14,6 +17,7 @@
 #define MIN_BRUSH_SIZE 1
 #define MAX_BRUSH_SIZE 9
 
+#define OOB 255
 #define EMPTY 0
 #define WALL 1
 #define SAND 2
@@ -52,6 +56,40 @@
 #define METAL_MAXTEMP 200
 #define STEAM_MAXTEMP 255 
 #define TORCH_MAXTEMP 255
+
+constexpr int NEIGHBORS[8][2] = {
+	{ -1, 1 },
+	{0, 1},
+	{1, 1},
+	{ -1, 0},
+	{1, 0},
+	{ -1, -1},
+	{0, -1 },
+	{1, -1 }
+
+	// in our test, the move selected had a value of 32. the index was 5. 2^5 = 32.
+	// so we need to re order this index so that the indices actually relate to the correct
+	// candidate
+};
+
+constexpr std::byte MOVE_NONE{ 0b00000000 };
+constexpr std::byte MOVE_UPLEFT{ 0b00000001 };
+constexpr std::byte MOVE_UP{ 0b00000010 };
+constexpr std::byte MOVE_UPRIGHT{ 0b00000100 };
+constexpr std::byte MOVE_LEFT{ 0b00001000 };
+constexpr std::byte MOVE_RIGHT{ 0b00010000 };
+constexpr std::byte MOVE_DOWNLEFT{ 0b00100000 };
+constexpr std::byte MOVE_DOWN{ 0b01000000 };
+constexpr std::byte MOVE_DOWNRIGHT{ 0b10000000 };
+
+constexpr std::byte TOP_LEFT{ 0b10000000 };
+constexpr std::byte TOP{ 0b01000000 };
+constexpr std::byte TOP_RIGHT{ 0b00100000 };
+constexpr std::byte LEFT{ 0b00010000 };
+constexpr std::byte RIGHT{ 0b00001000 };
+constexpr std::byte BOTTOM_LEFT{ 0b00000100 };
+constexpr std::byte BOTTOM{ 0b00000010 };
+constexpr std::byte BOTTOM_RIGHT{ 0b00000001 };
 
 constexpr uint16_t EMPTY_TDIFF = 21;
 constexpr uint16_t WALL_TDIFF = 3;

@@ -4,6 +4,9 @@ Game::Game() {
 	m_bufferWriteMode = 1;
 	m_wPtr = &m_pBuffers.first;
 	m_rPtr = &m_pBuffers.second;
+	m_changes.reserve(1000);
+	//m_changes = std::vector<std::pair<int, int>>(1000);
+	//m_changes.assign(1000, std::make_pair(-1, -1));
 
 	std::random_device rd;
 	m_rg = std::mt19937(rd());
@@ -13,6 +16,7 @@ Game::Game() {
 	m_dFire = std::uniform_int_distribution<int>(20, 40);
 	m_dist = std::uniform_int_distribution<int>(0, 99);
 
+	m_particles = std::vector<Particle>(TEXTURE_ROWS * TEXTURE_COLS);
 	m_pBuffers.first = std::vector<Particle>(TEXTURE_ROWS * TEXTURE_COLS);
 	m_pBuffers.second = std::vector<Particle>(TEXTURE_ROWS * TEXTURE_COLS);
 	m_particleChoice = 0;
@@ -72,7 +76,63 @@ void Game::update() {
 	swapBuffers();
 }
 
-void Game::updateSand(int _x, int _y) {
+void Game::update2() {
+	for (int i = 0; i < TEXTURE_COLS; ++i) {
+		for (int j = 0; j < TEXTURE_ROWS; ++j) {
+			switch (m_particles[j * TEXTURE_ROWS + i].m_id) {
+			case EMPTY:
+				break;
+			case WALL:
+				break;
+			case SAND:
+				updateSand2(i, j);
+				break;
+			case WATER:
+				updateWater2(i, j);
+			}
+		}
+	}
+
+	commitUpdate();
+}
+
+void Game::commitUpdate() {
+	//for (size_t i = 0; i < m_changes.size(); ++i) {
+	//	if (m_particles[m_changes[i].first].m_id != EMPTY) {
+	//		m_changes[i] = m_changes.back(); m_changes.pop_back();
+	//		--i;
+	//	}
+	//}
+
+	std::sort(m_changes.begin(), m_changes.end(),
+		[](auto &a, auto &b) { return a.first < b.first; }
+	);
+
+	m_changes.emplace_back(-1, -1);
+	size_t iprev = 0;
+	for (size_t i = 0; i < m_changes.size() - 1; i++) {
+
+		// since we have sorted our moves by the src, we need to skip along
+		// until we find where the next src starts in the vector
+		if (m_changes[i + 1].first != m_changes[i].first) {
+			// pick a value between iprev and i - prev
+			size_t rand = iprev + mymath::randInt(i - iprev);
+
+			size_t dst = m_changes[rand].first;
+			size_t src = m_changes[rand].second;
+
+			Particle tmp = m_particles[dst];
+			m_particles[dst] = m_particles[src];
+			m_particles[src] = tmp;
+
+			iprev = i + 1;
+		}
+	}
+	m_changes.clear();
+	//swapBuffers();
+}
+
+void Game::updateSand2(int _x, int _y) {
 	bool emptyBottom = isEmpty(_x, _y - 1);
 	bool emptyBottomLeft = isEmpty(_x - 1, _y - 1);
 	bool emptyBottomRight = isEmpty(_x + 1, _y - 1);
@@ -82,64 +142,31 @@ void Game::updateSand(int _x, int _y) {
 	bool waterLeft = isWater(_x, _y - 1);
 	bool waterRight = isWater(_x, _y + 1);
 
-	//if (emptyBottom) {
-	//	pSwap(getIndex(_x, _y), getIndex(_x, _y - 1));
-	//	return;
-	//} 
 	int choice = m_dist(m_rg) % 3;
 	choice = m_dist(m_rg) % 3;
 	switch (choice) {
 	case 0:
 		if (emptyBottom) {
-			pSwap(getIndex(_x, _y), getIndex(_x, _y - 1));
+			storeChange(_x, _y, _x, _y - 1);
 			return;
 		} break;
 	case 1:
 		if (emptyBottomLeft) {
-			pSwap(getIndex(_x, _y), getIndex(_x - 1, _y - 1));
+			storeChange(_x, _y, _x - 1, _y - 1);
 			return;
 		} break;
 	case 2:
 		if (emptyBottomRight) {
-			pSwap(getIndex(_x, _y), getIndex(_x + 1, _y - 1));
+			storeChange(_x, _y, _x + 1, _y - 1);
 			return;
 		} break;
 	}
-
-	choice = m_dist(m_rg) % 3;
-	switch (choice) {
-	case 0:
-		if (waterBottom) {
-			pSwap(getIndex(_x, _y), getIndex(_x, _y - 1));
-			return;
-		} break;
-	case 1:
-		if (waterBottomLeft) {
-			pSwap(getIndex(_x, _y), getIndex(_x - 1, _y - 1));
-			return;
-		} else if (waterLeft) {
-			pSwap(getIndex(_x, _y), getIndex(_x - 1, _y));
-			return;
-		} break;
-	case 2:
-		if (waterBottomRight) {
-			pSwap(getIndex(_x, _y), getIndex(_x + 1, _y - 1));
-			return;
-		} else if (waterRight) {
-			pSwap(getIndex(_x, _y), getIndex(_x + 1, _y));
-			return;
-		}
-		break;
-	}
-	noSwapUpdate(getIndex(_x, _y));
 }
 
-void Game::updateWater(int _x, int _y) {
-	if ((*m_rPtr)[getIndex(_x, _y)].m_temp >= WATER_MAXTEMP) {
-		steam(_x, _y);
-		return;
-	}
+void Game::updateSand(int _x, int _y) {
+}
 
+void Game::updateWater2(int _x, int _y) {
 	bool emptyBottom = isEmpty(_x, _y - 1);
 	bool emptyBottomLeft = isEmpty(_x - 1, _y - 1);
 	bool emptyBottomRight = isEmpty(_x + 1, _y - 1);
@@ -147,7 +174,7 @@ void Game::updateWater(int _x, int _y) {
 	bool emptyRight = isEmpty(_x + 1, _y);
 
 	if (emptyBottom) {
-		pSwap(getIndex(_x, _y), getIndex(_x, _y - 1));
+		storeChange(_x, _y, _x, _y - 1);
 		return;
 	}
 
@@ -155,22 +182,24 @@ void Game::updateWater(int _x, int _y) {
 	switch (choice) {
 	case 0:
 		if (emptyBottomLeft) {
-			pSwap(getIndex(_x, _y), getIndex(_x - 1, _y - 1)); 
+			storeChange(_x, _y, _x - 1, _y - 1);
 			return;
 		} else if (emptyLeft) {
-			pSwap(getIndex(_x, _y), getIndex(_x - 1, _y)); 
+			storeChange(_x, _y, _x - 1, _y);
 			return;
 		} break;
 	case 1:
 		if (emptyBottomRight) {
-			pSwap(getIndex(_x, _y), getIndex(_x + 1, _y - 1)); 
+			storeChange(_x, _y, _x + 1, _y - 1);
 			return;
 		} else if (emptyRight) {
-			pSwap(getIndex(_x, _y), getIndex(_x + 1, _y)); 
+			storeChange(_x, _y, _x + 1, _y);
 			return;
 		} break;
 	}
-	noSwapUpdate(getIndex(_x, _y));
+}
+
+void Game::updateWater(int _x, int _y) {
 }
 
 void Game::updateFire(int _x, int _y) {
@@ -467,32 +496,31 @@ void Game::brush() {
 
 void Game::wall(int _x, int _y) {
 	uint8_t c = static_cast<uint8_t>(m_dWall(m_rg));
-	(*m_wPtr)[getIndex(_x, _y)].m_id = WALL;
-	(*m_wPtr)[getIndex(_x, _y)].m_tdiff = WALL_TDIFF;
-	(*m_wPtr)[getIndex(_x, _y)].m_temp = WALL_BASETEMP;
-	(*m_wPtr)[getIndex(_x, _y)].m_color.x = c;
-	(*m_wPtr)[getIndex(_x, _y)].m_color.y = c;
-	(*m_wPtr)[getIndex(_x, _y)].m_color.z = c;
+	m_particles[getIndex(_x, _y)].m_id = WALL;
+	m_particles[getIndex(_x, _y)].m_tdiff = WALL_TDIFF;
+	m_particles[getIndex(_x, _y)].m_temp = WALL_BASETEMP;
+	m_particles[getIndex(_x, _y)].m_color.x = c;
+	m_particles[getIndex(_x, _y)].m_color.y = c;
+	m_particles[getIndex(_x, _y)].m_color.z = c;
 }
 
 void Game::sand(int _x, int _y) {
-	uint8_t c = static_cast<uint8_t>(m_dSand(m_rg));
-	(*m_wPtr)[getIndex(_x, _y)].m_id = SAND;
-	(*m_wPtr)[getIndex(_x, _y)].m_tdiff = SAND_TDIFF;
-	(*m_wPtr)[getIndex(_x, _y)].m_temp = SAND_BASETEMP;
-	(*m_wPtr)[getIndex(_x, _y)].m_color.x = SAND_COLOR[0];
-	(*m_wPtr)[getIndex(_x, _y)].m_color.y = SAND_COLOR[1];
-	(*m_wPtr)[getIndex(_x, _y)].m_color.z = SAND_COLOR[2];
+	m_particles[getIndex(_x, _y)].m_id = SAND;
+	m_particles[getIndex(_x, _y)].m_moves = MOVE_DOWNLEFT | MOVE_DOWN | MOVE_DOWNRIGHT;
+	m_particles[getIndex(_x, _y)].m_tdiff = SAND_TDIFF;
+	m_particles[getIndex(_x, _y)].m_temp = SAND_BASETEMP;
+	m_particles[getIndex(_x, _y)].m_color.x = SAND_COLOR[0];
+	m_particles[getIndex(_x, _y)].m_color.y = SAND_COLOR[1];
+	m_particles[getIndex(_x, _y)].m_color.z = SAND_COLOR[2];
 }
 
 void Game::water(int _x, int _y) {
-	uint8_t c = static_cast<uint8_t>(m_dWater(m_rg));
-	(*m_wPtr)[getIndex(_x, _y)].m_id = WATER;
-	(*m_wPtr)[getIndex(_x, _y)].m_tdiff = WATER_TDIFF;
-	(*m_wPtr)[getIndex(_x, _y)].m_temp = WATER_BASETEMP;
-	(*m_wPtr)[getIndex(_x, _y)].m_color.x = WATER_COLOR[0];
-	(*m_wPtr)[getIndex(_x, _y)].m_color.y = WATER_COLOR[1];
-	(*m_wPtr)[getIndex(_x, _y)].m_color.z = WATER_COLOR[2];
+	m_particles[getIndex(_x, _y)].m_id = WATER;
+	m_particles[getIndex(_x, _y)].m_tdiff = WATER_TDIFF;
+	m_particles[getIndex(_x, _y)].m_temp = WATER_BASETEMP;
+	m_particles[getIndex(_x, _y)].m_color.x = WATER_COLOR[0];
+	m_particles[getIndex(_x, _y)].m_color.y = WATER_COLOR[1];
+	m_particles[getIndex(_x, _y)].m_color.z = WATER_COLOR[2];
 }
 
 void Game::fire(int _x, int _y) {
