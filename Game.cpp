@@ -72,6 +72,99 @@ void Game::update() {
 	swapBuffers();
 }
 
+void Game::update2() {
+	for (int i = 0; i < TEXTURE_COLS; ++i) {
+		for (int j = 0; j < TEXTURE_ROWS; ++j) {
+			Particle *topLeft = inBounds(i - 1, j + 1) ? &(*m_rPtr)[getIndex(i - 1, j + 1)] : nullptr;
+			Particle *top = inBounds(i, j + 1) ? &(*m_rPtr)[getIndex(i, j + 1)] : nullptr;
+			Particle *topRight = inBounds(i + 1, j + 1) ? &(*m_rPtr)[getIndex(i + 1, j + 1)] : nullptr;
+			Particle *left = inBounds(i - 1, j) ? &(*m_rPtr)[getIndex(i - 1, j)] : nullptr;
+			Particle *right = inBounds(i + 1, j) ? &(*m_rPtr)[getIndex(i + 1, j)] : nullptr;
+			Particle *bottomLeft = inBounds(i - 1, j - 1) ? &(*m_rPtr)[getIndex(i - 1, j - 1)] : nullptr;
+			Particle *bottom = inBounds(i, j - 1) ? &(*m_rPtr)[getIndex(i, j - 1)] : nullptr;
+			Particle *bottomRight = inBounds(i + 1, j - 1) ? &(*m_rPtr)[getIndex(i + 1, j - 1)] : nullptr;
+		
+			Particle *p1 = &(*m_rPtr)[getIndex(i, j)];
+			uint8_t candidates = 0;
+			for (int a = -1; a <= 1; ++a) {
+				for (int b = -1; b <= 1; ++b) {
+					Particle *p = inBounds(i + a, j + b) ? &(*m_rPtr)[getIndex(i + a, j + b)] : nullptr;
+				
+					switch (p->m_id) {
+					case EMPTY:
+						break;
+					case SAND:
+
+					default:
+						break;
+					}
+				}
+			}
+
+
+		}
+	}
+}
+
+void Game::update3() {
+	std::byte zero{ 0b00000000 };
+
+	for (int i = 0; i < TEXTURE_COLS; ++i) {
+		for (int j = 0; j < TEXTURE_ROWS; ++j) {
+			Particle *destination = &(*m_rPtr)[getIndex(i, j)];
+			std::byte candidates{ 0b00000000 };
+			std::vector<std::size_t> indices;
+
+			// top left
+			Particle *p = getParticle(i - 1, j + 1);
+			candidates |= TOP_LEFT & (p != nullptr ? p->m_moves : zero);
+
+			// top
+			p = getParticle(i, j + 1);
+			candidates |= TOP & (p != nullptr ? p->m_moves : zero);
+
+			// top right
+			p = getParticle(i + 1, j + 1);
+			candidates |= TOP_RIGHT & (p != nullptr ? p->m_moves : zero);
+
+			// left
+			p = getParticle(i - 1, j);
+			candidates |= LEFT & (p != nullptr ? p->m_moves : zero);
+
+			// right 
+			p = getParticle(i + 1, j);
+			candidates |= RIGHT & (p != nullptr ? p->m_moves : zero);
+
+			// bottom left
+			p = getParticle(i - 1, j - 1);
+			candidates |= BOTTOM_LEFT & (p != nullptr ? p->m_moves : zero);
+
+			// bottom
+			p = getParticle(i, j - 1);
+			candidates |= BOTTOM & (p != nullptr ? p->m_moves : zero);
+
+			// bottom right
+			p = getParticle(i + 1, j - 1);
+			candidates |= BOTTOM_RIGHT & (p != nullptr ? p->m_moves : zero);
+
+			// collect the candidates and their indices
+			for (int i = 0; i < 8; ++i) {
+				if (static_cast<bool>(candidates & std::byte(1 << i))) {
+					indices.push_back(i);
+				}
+			}
+
+			if (indices.size() == 0) continue;
+
+			int choice = m_dist(m_rg) % indices.size();
+			choice = indices[choice];
+			pSwap(getIndex(i, j), getIndex(i + NEIGHBORS[choice][0], 
+				j + NEIGHBORS[choice][1]));
+		}
+	}
+	swapBuffers();
+}
+
 void Game::updateSand(int _x, int _y) {
 	bool emptyBottom = isEmpty(_x, _y - 1);
 	bool emptyBottomLeft = isEmpty(_x - 1, _y - 1);
@@ -478,6 +571,7 @@ void Game::wall(int _x, int _y) {
 void Game::sand(int _x, int _y) {
 	uint8_t c = static_cast<uint8_t>(m_dSand(m_rg));
 	(*m_wPtr)[getIndex(_x, _y)].m_id = SAND;
+	(*m_wPtr)[getIndex(_x, _y)].m_moves = MOVE_DOWNLEFT | MOVE_DOWN | MOVE_DOWNRIGHT;
 	(*m_wPtr)[getIndex(_x, _y)].m_tdiff = SAND_TDIFF;
 	(*m_wPtr)[getIndex(_x, _y)].m_temp = SAND_BASETEMP;
 	(*m_wPtr)[getIndex(_x, _y)].m_color.x = SAND_COLOR[0];

@@ -10,6 +10,7 @@
 #include <memory>
 #include <random>
 
+
 #include "Particle.hpp"
 #include "Sand.hpp"
 
@@ -24,6 +25,8 @@ public:
 	void initialize();
 
 	void update();
+	void update2();
+	void update3();
 
 	//void updateTemp(int _x, int _y);
 
@@ -95,7 +98,7 @@ public:
 	void flushWriteBuffer() {
 		for (int i = 0; i < TEXTURE_COLS; ++i) {
 			for (int j = 0; j < TEXTURE_ROWS; ++j) {
-				(*m_wPtr)[getIndex(i, j)].m_updated = 0;
+				//(*m_wPtr)[getIndex(i, j)].m_updated = 0;
 				setEmpty(i, j);
 			}
 		}
@@ -111,6 +114,10 @@ public:
 
 	size_t getIndex(int _x, int _y) {
 		return size_t(TEXTURE_COLS * _y + _x);
+	}
+
+	Particle *getParticle(int _x, int _y) {
+		return inBounds(_x, _y) ? &(*m_rPtr)[getIndex(_x, _y)] : nullptr;
 	}
 
 	bool inBounds(int _x, int _y) {
@@ -135,7 +142,6 @@ public:
 
 	void noSwapUpdate(size_t _idx) {
 		(*m_wPtr)[_idx].m_id = (*m_rPtr)[_idx].m_id;
-		(*m_wPtr)[_idx].m_latch = true;
 		(*m_wPtr)[_idx].m_color.x = (*m_rPtr)[_idx].m_color.x;
 		(*m_wPtr)[_idx].m_color.y = (*m_rPtr)[_idx].m_color.y;
 		(*m_wPtr)[_idx].m_color.z = (*m_rPtr)[_idx].m_color.z;
@@ -182,7 +188,6 @@ public:
 	void pSwap(size_t _idx1, size_t _idx2) {
 		//if ((*m_wPtr)[_idx1].m_id == EMPTY) {
 			(*m_wPtr)[_idx1].m_id = (*m_rPtr)[_idx2].m_id;
-			(*m_wPtr)[_idx1].m_latch = true;
 			(*m_wPtr)[_idx1].m_color.x = (*m_rPtr)[_idx2].m_color.x;
 			(*m_wPtr)[_idx1].m_color.y = (*m_rPtr)[_idx2].m_color.y;
 			(*m_wPtr)[_idx1].m_color.z = (*m_rPtr)[_idx2].m_color.z;
@@ -192,7 +197,6 @@ public:
 
 		//if ((*m_wPtr)[_idx2].m_id == EMPTY) {
 			(*m_wPtr)[_idx2].m_id = (*m_rPtr)[_idx1].m_id;
-			(*m_wPtr)[_idx2].m_latch = true;
 			(*m_wPtr)[_idx2].m_color.x = (*m_rPtr)[_idx1].m_color.x;
 			(*m_wPtr)[_idx2].m_color.y = (*m_rPtr)[_idx1].m_color.y;
 			(*m_wPtr)[_idx2].m_color.z = (*m_rPtr)[_idx1].m_color.z;

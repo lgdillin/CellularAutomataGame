@@ -63,7 +63,8 @@ int main(int argc, char *argv[]) {
 		controller.update();
 
 		// update game
-		game.update();
+		//game.update();
+		game.update3();
 
 		// update view
 		view.repaint();

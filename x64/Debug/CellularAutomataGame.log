@@ -1,16 +1,9 @@
-﻿  Controller.cpp
-C:\Users\liamd\OneDrive\Documents\Visual Studio Projects\CellularAutomataGame\MyVectors.hpp(56,18): warning C4244: 'argument': conversion from 'uint16_t' to 'uint8_t', possible loss of data
-  (compiling source file 'Controller.cpp')
-  
-  Game.cpp
+﻿  Game.cpp
 C:\Users\liamd\OneDrive\Documents\Visual Studio Projects\CellularAutomataGame\MyVectors.hpp(56,18): warning C4244: 'argument': conversion from 'uint16_t' to 'uint8_t', possible loss of data
   (compiling source file 'Game.cpp')
   
-C:\Users\liamd\OneDrive\Documents\Visual Studio Projects\CellularAutomataGame\Game.cpp(184,15): warning C4244: 'initializing': conversion from 'uint16_t' to 'uint8_t', possible loss of data
-  View.cpp
-C:\Users\liamd\OneDrive\Documents\Visual Studio Projects\CellularAutomataGame\MyVectors.hpp(56,18): warning C4244: 'argument': conversion from 'uint16_t' to 'uint8_t', possible loss of data
-  (compiling source file 'View.cpp')
-  
+C:\Users\liamd\OneDrive\Documents\Visual Studio Projects\CellularAutomataGame\Game.cpp(160,27): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\liamd\OneDrive\Documents\Visual Studio Projects\CellularAutomataGame\Game.cpp(277,15): warning C4244: 'initializing': conversion from 'uint16_t' to 'uint8_t', possible loss of data
   main.cpp
 C:\Users\liamd\OneDrive\Documents\Visual Studio Projects\CellularAutomataGame\MyVectors.hpp(56,18): warning C4244: 'argument': conversion from 'uint16_t' to 'uint8_t', possible loss of data
   (compiling source file 'main.cpp')
@@ -20,5 +13,9 @@ C:\Users\liamd\OneDrive\Documents\Visual Studio Projects\CellularAutomataGame\ma
 C:\Users\liamd\OneDrive\Documents\Visual Studio Projects\CellularAutomataGame\main.cpp(18,11): warning C4244:         [
 C:\Users\liamd\OneDrive\Documents\Visual Studio Projects\CellularAutomataGame\main.cpp(18,11): warning C4244:             _Rep=__int64
 C:\Users\liamd\OneDrive\Documents\Visual Studio Projects\CellularAutomataGame\main.cpp(18,11): warning C4244:         ]
+  View.cpp
+C:\Users\liamd\OneDrive\Documents\Visual Studio Projects\CellularAutomataGame\MyVectors.hpp(56,18): warning C4244: 'argument': conversion from 'uint16_t' to 'uint8_t', possible loss of data
+  (compiling source file 'View.cpp')
+  
   Generating Code...
   CellularAutomataGame.vcxproj -> C:\Users\liamd\OneDrive\Documents\Visual Studio Projects\CellularAutomataGame\x64\Debug\CellularAutomataGame.exe
