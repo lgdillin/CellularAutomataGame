@@ -1,9 +1,6 @@
 #include "Game.hpp"
 
 Game::Game() {
-	m_bufferWriteMode = 1;
-	m_wPtr = &m_pBuffers.first;
-	m_rPtr = &m_pBuffers.second;
 	m_changes.reserve(1000);
 	//m_changes = std::vector<std::pair<int, int>>(1000);
 	//m_changes.assign(1000, std::make_pair(-1, -1));
@@ -17,9 +14,7 @@ Game::Game() {
 	m_dist = std::uniform_int_distribution<int>(0, 99);
 
 	m_particles = std::vector<Particle>(TEXTURE_ROWS * TEXTURE_COLS);
-	m_pBuffers.first = std::vector<Particle>(TEXTURE_ROWS * TEXTURE_COLS);
-	m_pBuffers.second = std::vector<Particle>(TEXTURE_ROWS * TEXTURE_COLS);
-	m_particleChoice = 0;
+	m_selectedParticle = 0;
 
 	m_mousex = 0;
 	m_mousey = 0;
@@ -33,49 +28,6 @@ void Game::initialize() {
 
 }
 
-void Game::update() {
-	for (int i = 0; i < TEXTURE_COLS; ++i) {
-		for (int j = 0; j < TEXTURE_ROWS; ++j) {
-			//if ((*m_bPtr)[j * TEXTURE_ROWS + i].m_latch) continue;
-
-			switch ((*m_rPtr)[j * TEXTURE_ROWS + i].m_id) {
-			case EMPTY:
-				
-				break;
-			case WALL:
-				noSwapUpdate(getIndex(i, j));
-				break;
-			case SAND:
-				updateSand(i, j);
-				break;
-			case WATER:
-				updateWater(i, j);
-				break;
-			case FIRE:
-				updateFire(i, j);
-				break;
-			case SMOKE:
-				updateSmoke(i, j);
-				break;
-			case METAL:
-				updateMetal(i, j);
-				break;
-			case STEAM:
-				updateSteam(i, j);
-				break;
-			case TORCH:
-				updateTorch(i, j);
-				break;
-			}
-
-			// universal
-			//cTemps(i, j);
-		}
-	}
-
-	swapBuffers();
-}
-
 void Game::update2() {
 	for (int i = 0; i < TEXTURE_COLS; ++i) {
 		for (int j = 0; j < TEXTURE_ROWS; ++j) {
@@ -85,7 +37,7 @@ void Game::update2() {
 			case WALL:
 				break;
 			case SAND:
-				updateSand2(i, j);
+				updateSand(i, j);
 				break;
 			case WATER:
 				updateWater2(i, j);
@@ -132,7 +84,7 @@ void Game::commitUpdate() {
 	//swapBuffers();
 }
 
-void Game::updateSand2(int _x, int _y) {
+void Game::updateSand(int _x, int _y) {
 	bool emptyBottom = isEmpty(_x, _y - 1);
 	bool emptyBottomLeft = isEmpty(_x - 1, _y - 1);
 	bool emptyBottomRight = isEmpty(_x + 1, _y - 1);
@@ -161,9 +113,6 @@ void Game::updateSand2(int _x, int _y) {
 			return;
 		} break;
 	}
-}
-
-void Game::updateSand(int _x, int _y) {
 }
 
 void Game::updateWater2(int _x, int _y) {
@@ -199,18 +148,16 @@ void Game::updateWater2(int _x, int _y) {
 	}
 }
 
-void Game::updateWater(int _x, int _y) {
-}
 
 void Game::updateFire(int _x, int _y) {
-	if ((*m_rPtr)[getIndex(_x, _y)].m_temp <= FIRE_MINTEMP) {
+	if (m_particles[getIndex(_x, _y)].m_temp <= FIRE_MINTEMP) {
 		//smoke(_x, _y);
 		//return;
 		setEmpty(_x, _y);
 		return;
 	} 
 
-	uint8_t temp = (*m_rPtr)[getIndex(_x, _y)].m_temp;
+	uint8_t temp = m_particles[getIndex(_x, _y)].m_temp;
 	//m_particles[getIndex(_x, _y)].m_color.x = mymath::lerpU8(temp, 0, 1000, FIRE_COLOR[0], 255);
 	//m_particles[getIndex(_x, _y)].m_color.y = 255 - mymath::lerpU8(temp, 0, 1000, 0, 255);
 	uint8_t r = mymath::cxlerpu8(temp, FIRE_MINTEMP,
@@ -263,10 +210,10 @@ void Game::updateFire(int _x, int _y) {
 }
 
 void Game::updateSmoke(int _x, int _y) {
-	if ((*m_rPtr)[getIndex(_x, _y)].m_temp < SMOKE_MINTEMP) {
+	if (m_particles[getIndex(_x, _y)].m_temp < SMOKE_MINTEMP) {
 		setEmpty(_x, _y);
 		return;
-	} else if ((*m_rPtr)[getIndex(_x, _y)].m_temp > FIRE_MINTEMP) {
+	} else if (m_particles[getIndex(_x, _y)].m_temp > FIRE_MINTEMP) {
 		fire(_x, _y);
 	} else {
 
@@ -303,7 +250,7 @@ void Game::updateSmoke(int _x, int _y) {
 }
 
 void Game::updateMetal(int _x, int _y) {
-	int temp = (*m_rPtr)[getIndex(_x, _y)].m_temp;
+	int temp = m_particles[getIndex(_x, _y)].m_temp;
 
 	//if (temp > 100) {
 
@@ -327,7 +274,7 @@ void Game::updateMetal(int _x, int _y) {
 }
 
 void Game::updateSteam(int _x, int _y) {
-	if ((*m_rPtr)[getIndex(_x, _y)].m_temp < WATER_BASETEMP) {
+	if (m_particles[getIndex(_x, _y)].m_temp < WATER_BASETEMP) {
 		water(_x, _y);
 		return;
 	}
@@ -459,7 +406,7 @@ void Game::brush() {
 		for (int j = -halfBrush; j <= halfBrush; ++j) {
 			if (!inBounds(x + i, y + j)) continue;
 
-			switch (m_particleChoice) {
+			switch (m_selectedParticle) {
 			case EMPTY:
 
 				break;
@@ -525,48 +472,48 @@ void Game::water(int _x, int _y) {
 
 void Game::fire(int _x, int _y) {
 	uint8_t c = static_cast<uint8_t>(m_dFire(m_rg));
-	(*m_wPtr)[getIndex(_x, _y)].m_id = FIRE;
-	(*m_wPtr)[getIndex(_x, _y)].m_tdiff = FIRE_TDIFF;
-	(*m_wPtr)[getIndex(_x, _y)].m_temp = FIRE_BASETEMP;
-	(*m_wPtr)[getIndex(_x, _y)].m_color.x = FIRE_COLOR[0];
-	(*m_wPtr)[getIndex(_x, _y)].m_color.y = FIRE_COLOR[1];
-	(*m_wPtr)[getIndex(_x, _y)].m_color.z = FIRE_COLOR[2];
+	m_particles[getIndex(_x, _y)].m_id = FIRE;
+	m_particles[getIndex(_x, _y)].m_tdiff = FIRE_TDIFF;
+	m_particles[getIndex(_x, _y)].m_temp = FIRE_BASETEMP;
+	m_particles[getIndex(_x, _y)].m_color.x = FIRE_COLOR[0];
+	m_particles[getIndex(_x, _y)].m_color.y = FIRE_COLOR[1];
+	m_particles[getIndex(_x, _y)].m_color.z = FIRE_COLOR[2];
 }
 
 void Game::smoke(int _x, int _y) {
 	uint8_t c = static_cast<uint8_t>(m_dWall(m_rg));
-	(*m_wPtr)[getIndex(_x, _y)].m_id = SMOKE;
-	(*m_wPtr)[getIndex(_x, _y)].m_tdiff = SMOKE_TDIFF;
-	(*m_wPtr)[getIndex(_x, _y)].m_temp = SMOKE_BASETEMP;
-	(*m_wPtr)[getIndex(_x, _y)].m_color.x = SMOKE_COLOR[0];
-	(*m_wPtr)[getIndex(_x, _y)].m_color.y = SMOKE_COLOR[1];
-	(*m_wPtr)[getIndex(_x, _y)].m_color.z = SMOKE_COLOR[2];
+	m_particles[getIndex(_x, _y)].m_id = SMOKE;
+	m_particles[getIndex(_x, _y)].m_tdiff = SMOKE_TDIFF;
+	m_particles[getIndex(_x, _y)].m_temp = SMOKE_BASETEMP;
+	m_particles[getIndex(_x, _y)].m_color.x = SMOKE_COLOR[0];
+	m_particles[getIndex(_x, _y)].m_color.y = SMOKE_COLOR[1];
+	m_particles[getIndex(_x, _y)].m_color.z = SMOKE_COLOR[2];
 }
 
 void Game::metal(int _x, int _y) {
 	uint8_t c = static_cast<uint8_t>(m_dWall(m_rg));
-	(*m_wPtr)[getIndex(_x, _y)].m_id = METAL;
-	(*m_wPtr)[getIndex(_x, _y)].m_tdiff = METAL_TDIFF;
-	(*m_wPtr)[getIndex(_x, _y)].m_temp = METAL_BASETEMP;
-	(*m_wPtr)[getIndex(_x, _y)].m_color.x = METAL_COLOR[0];
-	(*m_wPtr)[getIndex(_x, _y)].m_color.y = METAL_COLOR[1];
-	(*m_wPtr)[getIndex(_x, _y)].m_color.z = METAL_COLOR[2];
+	m_particles[getIndex(_x, _y)].m_id = METAL;
+	m_particles[getIndex(_x, _y)].m_tdiff = METAL_TDIFF;
+	m_particles[getIndex(_x, _y)].m_temp = METAL_BASETEMP;
+	m_particles[getIndex(_x, _y)].m_color.x = METAL_COLOR[0];
+	m_particles[getIndex(_x, _y)].m_color.y = METAL_COLOR[1];
+	m_particles[getIndex(_x, _y)].m_color.z = METAL_COLOR[2];
 }
 
 void Game::steam(int _x, int _y) {
-	(*m_wPtr)[getIndex(_x, _y)].m_id = STEAM;
-	(*m_wPtr)[getIndex(_x, _y)].m_tdiff = STEAM_TDIFF;
-	(*m_wPtr)[getIndex(_x, _y)].m_temp = STEAM_BASETEMP;
-	(*m_wPtr)[getIndex(_x, _y)].m_color.x = 100;
-	(*m_wPtr)[getIndex(_x, _y)].m_color.y = 100;
-	(*m_wPtr)[getIndex(_x, _y)].m_color.z = 180;
+	m_particles[getIndex(_x, _y)].m_id = STEAM;
+	m_particles[getIndex(_x, _y)].m_tdiff = STEAM_TDIFF;
+	m_particles[getIndex(_x, _y)].m_temp = STEAM_BASETEMP;
+	m_particles[getIndex(_x, _y)].m_color.x = 100;
+	m_particles[getIndex(_x, _y)].m_color.y = 100;
+	m_particles[getIndex(_x, _y)].m_color.z = 180;
 }
 
 void Game::torch(int _x, int _y) {
-	(*m_wPtr)[getIndex(_x, _y)].m_id = TORCH;
-	(*m_wPtr)[getIndex(_x, _y)].m_tdiff = TORCH_TDIFF;
-	(*m_wPtr)[getIndex(_x, _y)].m_temp = TORCH_BASETEMP;
-	(*m_wPtr)[getIndex(_x, _y)].m_color.x = 150;
-	(*m_wPtr)[getIndex(_x, _y)].m_color.y = 150;
-	(*m_wPtr)[getIndex(_x, _y)].m_color.z = 0;
+	m_particles[getIndex(_x, _y)].m_id = TORCH;
+	m_particles[getIndex(_x, _y)].m_tdiff = TORCH_TDIFF;
+	m_particles[getIndex(_x, _y)].m_temp = TORCH_BASETEMP;
+	m_particles[getIndex(_x, _y)].m_color.x = 150;
+	m_particles[getIndex(_x, _y)].m_color.y = 150;
+	m_particles[getIndex(_x, _y)].m_color.z = 0;
 }
