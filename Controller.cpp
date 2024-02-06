@@ -57,27 +57,27 @@ void Controller::keyDown(SDL_KeyboardEvent *_event) {
 		}
 
 		if (_event->keysym.scancode == SDL_SCANCODE_1) {
-			m_game->m_particleChoice = WALL;
+			m_game->m_selectedParticle = WALL;
 		}
 
 		if (_event->keysym.scancode == SDL_SCANCODE_2) {
-			m_game->m_particleChoice = SAND;
+			m_game->m_selectedParticle = SAND;
 		}
 
 		if (_event->keysym.scancode == SDL_SCANCODE_3) {
-			m_game->m_particleChoice = WATER;
+			m_game->m_selectedParticle = WATER;
 		}
 
 		if (_event->keysym.scancode == SDL_SCANCODE_4) {
-			m_game->m_particleChoice = FIRE;
+			m_game->m_selectedParticle = FIRE;
 		}
 
 		if (_event->keysym.scancode == SDL_SCANCODE_5) {
-			m_game->m_particleChoice = METAL;
+			m_game->m_selectedParticle = METAL;
 		}
 
 		if (_event->keysym.scancode == SDL_SCANCODE_6) {
-			m_game->m_particleChoice = TORCH;
+			m_game->m_selectedParticle = TORCH;
 		}
 	}
 }

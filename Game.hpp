@@ -24,7 +24,6 @@ public:
 
 	void initialize();
 
-	void update();
 	void update2();
 	void commitUpdate();
 
@@ -32,7 +31,7 @@ public:
 
 	void updateSand(int _x, int _y);
 
-	void updateWater2(int _x, int _y);
+	void updateWater(int _x, int _y);
 
 	void updateFire(int _x, int _y);
 	void updateSmoke(int _x, int _y);
@@ -40,15 +39,7 @@ public:
 	void updateSteam(int _x, int _y);
 	void updateTorch(int _x, int _y);
 
-	//void setEmpty(int _x, int _y);
-
-	//void addWall(int _x, int _y);
-	//void addSand(int _x, int _y);
-	//void addWater(int _x, int _y);
-	//void addFire(int _x, int _y);
-	//void addSmoke(int _x, int _y);
-	//void addMetal(int _x, int _y);
-	//void addSteam(int _x, int _y);
+	void calcTemp(int _x, int _y);
 
 	void brush();
 
@@ -63,6 +54,7 @@ public:
 
 	std::vector<Particle> m_particles;
 	std::vector<std::pair<int, int>> m_changes;
+	std::vector<uint16_t> m_tempGrid;
 
 	std::mt19937 m_rg;
 	std::uniform_int_distribution<int> m_dist;
@@ -104,43 +96,19 @@ public:
 	}
 
 	uint8_t getId(int _x, int _y) {
-		return m_particles[getIndex(_x, _y)].m_id;
+		return inBounds(_x, _y) ? m_particles[getIndex(_x, _y)].m_id : 255;
+	}
+
+	uint16_t getTemp(int _x, int _y) {
+		return inBounds(_x, _y) ? m_particles[getIndex(_x, _y)].m_temp : EMPTY_BASETEMP;
 	}
 
 	void storeChange(int _x1, int _y1, int _x2, int _y2) {
 		m_changes.emplace_back(getIndex(_x1, _y1), getIndex(_x2, _y2));
 	}
 
-	void cTemps(int _x, int _y) {
-		uint16_t td = m_particles[getIndex(_x, _y)].m_tdiff;
-		//uint16_t td2 = m_particles[_idx2].m_tdiff;
-
-		uint16_t center = inBounds(_x, _y) ? m_particles[getIndex(_x, _y)].m_temp : EMPTY_BASETEMP;
-		uint16_t left = inBounds(_x - 1, _y) ? m_particles[getIndex(_x - 1, _y)].m_temp : EMPTY_BASETEMP;
-		uint16_t right = inBounds(_x + 1, _y) ? m_particles[getIndex(_x + 1, _y)].m_temp : EMPTY_BASETEMP;
-		uint16_t bottom = inBounds(_x, _y - 1) ? m_particles[getIndex(_x, _y - 1)].m_temp : EMPTY_BASETEMP;
-		uint16_t top = inBounds(_x, _y + 1) ? m_particles[getIndex(_x, _y + 1)].m_temp : EMPTY_BASETEMP;
-		uint16_t topLeft = inBounds(_x - 1, _y + 1) ? m_particles[getIndex(_x - 1, _y + 1)].m_temp : EMPTY_BASETEMP;
-		uint16_t topRight = inBounds(_x + 1, _y + 1) ? m_particles[getIndex(_x + 1, _y + 1)].m_temp : EMPTY_BASETEMP;
-		uint16_t bottomLeft = inBounds(_x - 1, _y - 1) ? m_particles[getIndex(_x - 1, _y - 1)].m_temp : EMPTY_BASETEMP;
-		uint16_t bottomRight = inBounds(_x + 1, _y - 1) ? m_particles[getIndex(_x + 1, _y - 1)].m_temp : EMPTY_BASETEMP;
-
-
-		//(*m_bPtr)[getIndex(_x, _y)].m_temp = static_cast<uint16_t>(
-		//	center + (td / (float)1000) * (right - 2 * center + left + top - 2 * center + bottom));
-		float tdf = (float)td / 10000;
-		m_particles[getIndex(_x, _y)].m_temp = static_cast<uint16_t>(
-			center
-			+ tdf * (right - 2 * center + left)
-			+ tdf * (top - 2 * center + bottom)
-			+ 0.5f * tdf * (topRight - 2 * center + bottomLeft)
-			+ 0.5f * tdf * (topLeft - 2 * center + bottomRight)
-			);
-	}
-
 	void setEmpty(int _x, int _y) {
 		m_particles[getIndex(_x, _y)].m_id = EMPTY;
-		m_particles[getIndex(_x, _y)].m_tdiff = EMPTY_TDIFF;
 		m_particles[getIndex(_x, _y)].m_temp = EMPTY_BASETEMP;
 		m_particles[getIndex(_x, _y)].m_color.x = 0;
 		m_particles[getIndex(_x, _y)].m_color.y = 0;
@@ -153,14 +121,117 @@ public:
 		m_particles[_idx1].m_color.y = m_particles[_idx2].m_color.y;
 		m_particles[_idx1].m_color.z = m_particles[_idx2].m_color.z;
 		m_particles[_idx1].m_temp = m_particles[_idx2].m_temp;
-		m_particles[_idx1].m_tdiff = m_particles[_idx2].m_tdiff;
 		
 		m_particles[_idx2].m_id = m_particles[_idx1].m_id;
 		m_particles[_idx2].m_color.x = m_particles[_idx1].m_color.x;
 		m_particles[_idx2].m_color.y = m_particles[_idx1].m_color.y;
 		m_particles[_idx2].m_color.z = m_particles[_idx1].m_color.z;
 		m_particles[_idx2].m_temp = m_particles[_idx1].m_temp;
-		m_particles[_idx2].m_tdiff = m_particles[_idx1].m_tdiff;
+	}
+
+	float T_CON(uint8_t _id) {
+		switch (_id) {
+		case EMPTY:
+			return 0.0257f;
+			break;
+		case WALL:
+			return 1;
+			break;
+		case SAND:
+			return 3;
+			break;
+		case WATER:
+			return 0.606f;
+			break;
+		case FIRE:
+			return 0.06f;
+			break;
+		case SMOKE:
+			return 1;
+			break;
+		case METAL:
+			return 80.0f;
+			break;
+		case STEAM:
+			return 1;
+			break;
+		case TORCH:
+			return 0.06f;
+			break;
+		case OOB:
+			return 0.0257;
+			break;
+		}
+	}
+
+	float S_HEAT(uint8_t _id) {
+		switch (_id) {
+		case EMPTY:
+			return 1005.0f;
+			break;
+		case WALL:
+			return 1;
+			break;
+		case SAND:
+			return 75;
+			break;
+		case WATER:
+			return 4186.0f;
+			break;
+		case FIRE:
+			return 1003.0f;
+			break;
+		case SMOKE:
+			return 1;
+			break;
+		case METAL:
+			return 449.0f;
+			break;
+		case STEAM:
+			return 1;
+			break;
+		case TORCH:
+			return 1005.0f;
+			break;
+		case OOB:
+			return 1005.0f;
+			break;
+		}
+	}
+
+	float DENSITY(int _id) {
+		switch (_id) {
+		case EMPTY:
+			return 1.225f;
+			break;
+		case WALL:
+			return 1;
+			break;
+		case SAND:
+			return 75;
+			break;
+		case WATER:
+			return 1000.0f;
+			break;
+		case FIRE:
+			return 1.1f;
+			break;
+		case SMOKE:
+			return 1;
+			break;
+		case METAL:
+			return 7870.0f;
+			break;
+		case STEAM:
+			return 1;
+			break;
+		case TORCH:
+			return 1.05f;
+			break;
+		case OOB:
+			return 1.005f;
+			break;
+		}
 	}
 
 private:
