@@ -64,7 +64,7 @@ int main(int argc, char *argv[]) {
 
 		// update game
 		//game.update();
-		game.update2();
+		game.update3();
 
 		// update view
 		view.repaint();

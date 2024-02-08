@@ -25,6 +25,7 @@ public:
 	void initialize();
 
 	void update2();
+	void update3();
 	void commitUpdate();
 
 	//void updateTemp(int _x, int _y);
@@ -39,7 +40,7 @@ public:
 	void updateSteam(int _x, int _y);
 	void updateTorch(int _x, int _y);
 
-	void calcTemp(int _x, int _y);
+	//void calcTemp(int _x, int _y);
 
 	void brush();
 
@@ -101,7 +102,14 @@ public:
 	}
 
 	uint16_t getTemp(int _x, int _y) {
-		return inBounds(_x, _y) ? m_particles[getIndex(_x, _y)].m_temp : EMPTY_BASETEMP;
+		switch (inBounds(_x, _y)) {
+		case true:
+			return m_particles[getIndex(_x, _y)].m_temp;
+			break;
+		case false:
+			return EMPTY_BASETEMP;
+			break;
+		}
 	}
 
 	void storeChange(int _x1, int _y1, int _x2, int _y2) {
@@ -138,110 +146,17 @@ public:
 		m_particles[_idx2].m_temp = m_particles[_idx1].m_temp;
 	}
 
-	float T_CON(uint8_t _id) {
-		switch (_id) {
-		case EMPTY:
-			return 0.0257f;
-			break;
-		case WALL:
-			return 1;
-			break;
-		case SAND:
-			return 3;
-			break;
-		case WATER:
-			return 0.606f;
-			break;
-		case FIRE:
-			return 0.06f;
-			break;
-		case SMOKE:
-			return 1;
-			break;
-		case METAL:
-			return 10.0f;
-			break;
-		case STEAM:
-			return 1;
-			break;
-		case TORCH:
-			return 0.06f;
-			break;
-		case OOB:
-			return 0.0257;
-			break;
-		}
-	}
+	//void calcTemp(int _x, int _y) {
+	//	float diff = T_CON(getId(_x, _y)) / (DENSITY(getId(_x, _y)) * S_HEAT(getId(_x, _y)));
+	//	float c = getTemp(_x, _y);
+	//	float t = getTemp(_x, _y + 1);
+	//	float l = getTemp(_x - 1, _y);
+	//	float r = getTemp(_x + 1, _y);
+	//	float b = getTemp(_x, _y - 1);
+	//	float tn1 = c + diff * (r + l + t + b - 4 * c);
+	//	//m_tempGrid[getIndex(_x, _y)] = static_cast<uint16_t>(tn1);
+	//}
 
-	float S_HEAT(uint8_t _id) {
-		switch (_id) {
-		case EMPTY:
-			return 1005.0f;
-			break;
-		case WALL:
-			return 1;
-			break;
-		case SAND:
-			return 75;
-			break;
-		case WATER:
-			return 1005.0f;;
-			break;
-		case FIRE:
-			return 1003.0f;
-			break;
-		case SMOKE:
-			return 1;
-			break;
-		case METAL:
-			return 1005.0f;
-			break;
-		case STEAM:
-			return 1;
-			break;
-		case TORCH:
-			return 1005.0f;
-			break;
-		case OOB:
-			return 1005.0f;
-			break;
-		}
-	}
-
-	float DENSITY(int _id) {
-		switch (_id) {
-		case EMPTY:
-			return 1.225f;
-			break;
-		case WALL:
-			return 1;
-			break;
-		case SAND:
-			return 75;
-			break;
-		case WATER:
-			return 3.2f;
-			break;
-		case FIRE:
-			return 1.1f;
-			break;
-		case SMOKE:
-			return 1;
-			break;
-		case METAL:
-			return 2;
-			break;
-		case STEAM:
-			return 1;
-			break;
-		case TORCH:
-			return 1.05f;
-			break;
-		case OOB:
-			return 1.005f;
-			break;
-		}
-	}
 
 private:
 };

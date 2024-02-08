@@ -60,6 +60,42 @@ void Game::update2() {
 	commitUpdate();
 }
 
+void Game::update3() {
+	int row = 0;
+	for (int i = 0; i < m_particles.size(); ++i) {
+		int col = i % TEXTURE_COLS;
+		if (i != 0 && col == 0) {
+			++row;
+		}
+
+		switch (m_particles[i].m_id) {
+		case EMPTY:
+			break;
+		case WALL:
+			break;
+		case SAND:
+			updateSand(col, row);
+			break;
+		case WATER:
+			updateWater(col, row);
+			break;
+		case FIRE:
+			updateFire(col, row);
+			break;
+		case METAL:
+			//std::cout << i << ", " << j << std::endl;
+			updateMetal(col, row);
+			break;
+
+		case TORCH:
+			updateTorch(col, row);
+			break;
+		}
+	}
+
+	commitUpdate();
+}
+
 void Game::commitUpdate() {
 	//for (size_t i = 0; i < m_changes.size(); ++i) {
 	//	if (m_particles[m_changes[i].first].m_id != EMPTY) {
@@ -96,18 +132,25 @@ void Game::commitUpdate() {
 	
 	// update temps
 	int row = 0;
+	float diff, c, t, l, r, b, tn1;
 	for (int i = 0; i < m_particles.size(); ++i) {
 		int col = i % TEXTURE_COLS;
 		if (i != 0 && col == 0) {
 			++row;
 		}
 
-		calcTemp(col, row);
+		diff = T_CON(m_particles[i].m_id) / DENSITY(m_particles[i].m_id);
+		c = getTemp(col, row);
+		t = getTemp(col, row + 1);
+		l = getTemp(col - 1, row);
+		r = getTemp(col + 1, row);
+		b = getTemp(col, row - 1);
+		tn1 = c + diff * (r + l + t + b - 4 * c);
 	}
 
-	for (int i = 0; i < m_particles.size(); ++i) {
-		m_particles[i].m_temp = m_tempGrid[i];
-	}
+	//for (int i = 0; i < m_particles.size(); ++i) {
+	//	m_particles[i].m_temp = m_tempGrid[i];
+	//}
 }
 
 void Game::updateSand(int _x, int _y) {
@@ -268,10 +311,23 @@ void Game::updateWater(int _x, int _y) {
 
 
 void Game::updateFire(int _x, int _y) {
-	float t = (m_particles[getIndex(_x, _y)].m_temp - FIRE_MINTEMP) / (FIRE_BASETEMP - FIRE_MINTEMP);
-	m_particles[getIndex(_x, _y)].m_color.x = mymath::lerp(240, 180, t);
-	m_particles[getIndex(_x, _y)].m_color.y = mymath::lerp(50, 130, t);
-	m_particles[getIndex(_x, _y)].m_color.z = mymath::lerp(20, 20, t);
+	float t = m_particles[getIndex(_x, _y)].m_temp;
+	float smooth;
+
+	if (t >= 2000) {
+		m_particles[getIndex(_x, _y)].m_color.x = 160;
+		m_particles[getIndex(_x, _y)].m_color.y = 120;
+		m_particles[getIndex(_x, _y)].m_color.z = 10;
+	} else if (t > 1920 && t < 2000) {
+		smooth = 80 - ((t - 1920) / 80);
+		m_particles[getIndex(_x, _y)].m_color.x = mymath::lerp(150, 180, t);
+		m_particles[getIndex(_x, _y)].m_color.y = mymath::lerp(140, 40, t);
+		m_particles[getIndex(_x, _y)].m_color.z = 10;
+	} else if (t <= 1920) {
+		m_particles[getIndex(_x, _y)].m_color.x = 180;
+		m_particles[getIndex(_x, _y)].m_color.y = 40;
+		m_particles[getIndex(_x, _y)].m_color.z = 10;
+	}
 
 	if (m_particles[getIndex(_x, _y)].m_temp <= FIRE_MINTEMP) {
 		extinguishFire(_x, _y);
@@ -528,21 +584,6 @@ void Game::updateTorch(int _x, int _y) {
 		fire(_x, _y - 1);
 	if (isEmpty(_x + 1, _y - 1))
 		fire(_x + 1, _y - 1);
-}
-
-void Game::calcTemp(int _x, int _y) {
-	float diff = T_CON(getId(_x, _y)) / (DENSITY(getId(_x, _y)) * S_HEAT(getId(_x, _y)));
-	float c = getTemp(_x, _y);
-	float t = getTemp(_x, _y + 1);
-	float l = getTemp(_x - 1, _y);
-	float r = getTemp(_x + 1, _y);
-	float b = getTemp(_x, _y - 1);
-	float tn1 = c + diff * (r + l + t + b - 4 * c);
-	m_tempGrid[getIndex(_x, _y)] = static_cast<uint16_t>(tn1);
-
-	if (getId(_x, _y) == WATER) {
-		//std::cout << "WATER " << tn1 << std::endl;
-	}
 }
 
 void Game::brush() {

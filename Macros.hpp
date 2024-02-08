@@ -5,11 +5,11 @@
 #include <bitset>
 #include <cstddef>
 
-#define SCREEN_WIDTH 800
-#define SCREEN_HEIGHT 600
+#define SCREEN_WIDTH 1000
+#define SCREEN_HEIGHT 1000
 
-#define TEXTURE_ROWS 300
-#define TEXTURE_COLS 300
+#define TEXTURE_ROWS 1000
+#define TEXTURE_COLS 1000
 
 #define MAX_U8BIT 255
 #define MAX_U16BIT 65535
@@ -71,3 +71,73 @@ constexpr uint8_t FIRE_G[2] = { 0, 150 };
 constexpr uint8_t FIRE_B[2] = { 25, 20 };
 
 constexpr uint8_t METAL_R[2] = { 70, 230 };
+
+constexpr float T_CON(uint8_t _id) {
+	switch (_id) {
+	case EMPTY:
+		return 0.0257f;
+		break;
+	case WALL:
+		return 1;
+		break;
+	case SAND:
+		return 3;
+		break;
+	case WATER:
+		return 0.606f;
+		break;
+	case FIRE:
+		return 0.06f;
+		break;
+	case SMOKE:
+		return 1;
+		break;
+	case METAL:
+		return 10.0f;
+		break;
+	case STEAM:
+		return 1;
+		break;
+	case TORCH:
+		return 0.06f;
+		break;
+	case OOB:
+		return 0.0257;
+		break;
+	}
+}
+
+constexpr float DENSITY(int _id) {
+	switch (_id) {
+	case EMPTY:
+		return 1.225f;
+		break;
+	case WALL:
+		return 1;
+		break;
+	case SAND:
+		return 75;
+		break;
+	case WATER:
+		return 3.2f;
+		break;
+	case FIRE:
+		return 1.1f;
+		break;
+	case SMOKE:
+		return 1;
+		break;
+	case METAL:
+		return 2;
+		break;
+	case STEAM:
+		return 1;
+		break;
+	case TORCH:
+		return 1.05f;
+		break;
+	case OOB:
+		return 1.005f;
+		break;
+	}
+}
