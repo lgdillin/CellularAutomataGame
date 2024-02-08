@@ -65,8 +65,10 @@ namespace mymath {
 			/ (_imax - _imin) + _omin);
 	}
 
-	static inline uint8_t lerp(int _a, int _b, int _t) {
-		return (1 - _t) * _a + _t * _b;
+	static inline uint8_t lerp(int _a, int _b, float _t) {
+		int minimum = _a < _b ? _a : _b;
+		int maximum = _a > _b ? _a : _b;
+		return (min(max((1 - _t) * _a + _t * _b, minimum), maximum));
 	}
 
 	//static inline uint8_t clerpu8(int _val, int _loval, int _hival, int _x1, int _x2,

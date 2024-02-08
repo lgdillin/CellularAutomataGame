@@ -27,24 +27,19 @@
 #define METAL 6
 #define STEAM 7
 #define TORCH 8
+#define MOLTENMETAL 9
 
-#define SAND_DENSITY 10
-#define WATER_DENSITY 8
-#define FIRE_DENSITY 2
-#define SMOKE_DENSITY 0
-#define STEAM_DENSITY 1
+constexpr uint16_t EMPTY_BASETEMP = 295;
+constexpr uint16_t WALL_BASETEMP = 295;
+constexpr uint16_t SAND_BASETEMP = 295;
+constexpr uint16_t WATER_BASETEMP = 295;
+constexpr uint16_t FIRE_BASETEMP = 2000;
+constexpr uint16_t SMOKE_BASETEMP = 295;
+constexpr uint16_t METAL_BASETEMP = 295;
+constexpr uint16_t STEAM_BASETEMP = 295;
+constexpr uint16_t TORCH_BASETEMP = 2200;
 
-#define EMPTY_BASETEMP 295
-#define WALL_BASETEMP 295
-#define SAND_BASETEMP 295
-#define WATER_BASETEMP 295
-#define FIRE_BASETEMP 770
-#define SMOKE_BASETEMP 105
-#define METAL_BASETEMP 70
-#define STEAM_BASETEMP 100
-#define TORCH_BASETEMP 1500
-
-#define FIRE_MINTEMP 400
+#define FIRE_MINTEMP 1900
 #define SMOKE_MINTEMP 70
 
 #define EMPTY_MAXTEMP 255
@@ -63,6 +58,7 @@ constexpr uint8_t FIRE_COLOR[3] = { 180, 130, 20};
 constexpr uint8_t SMOKE_COLOR[3] = { 150, 150, 150 };
 constexpr uint8_t METAL_COLOR[3] = { 70, 70, 70 };
 constexpr uint8_t STEAM_COLOR[3] = { 120, 120, 150 };
+constexpr uint8_t MOLTENMETAL_COLOR[3] = { 230, 230, 230 };
 
 constexpr uint8_t SAND_R[2] = { 170, 255 };
 constexpr uint8_t SAND_G[2] = { 120, 255 };

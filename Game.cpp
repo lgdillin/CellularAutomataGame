@@ -28,8 +28,8 @@ void Game::initialize() {
 }
 
 void Game::update2() {
-	for (int i = 0; i < TEXTURE_COLS; ++i) {
-		for (int j = 0; j < TEXTURE_ROWS; ++j) {
+	for (int i = 0; i < TEXTURE_ROWS; ++i) {
+		for (int j = 0; j < TEXTURE_COLS; ++j) {
 			switch (m_particles[j * TEXTURE_ROWS + i].m_id) {
 			case EMPTY:
 				break;
@@ -45,6 +45,7 @@ void Game::update2() {
 				updateFire(i, j);
 				break;
 			case METAL:
+				//std::cout << i << ", " << j << std::endl;
 				updateMetal(i, j);
 				break;
 
@@ -53,7 +54,6 @@ void Game::update2() {
 				break;
 			}
 
-			calcTemp(i, j);
 		}
 	}
 
@@ -95,6 +95,16 @@ void Game::commitUpdate() {
 	m_changes.clear();
 	
 	// update temps
+	int row = 0;
+	for (int i = 0; i < m_particles.size(); ++i) {
+		int col = i % TEXTURE_COLS;
+		if (i != 0 && col == 0) {
+			++row;
+		}
+
+		calcTemp(col, row);
+	}
+
 	for (int i = 0; i < m_particles.size(); ++i) {
 		m_particles[i].m_temp = m_tempGrid[i];
 	}
@@ -161,40 +171,98 @@ void Game::updateSand(int _x, int _y) {
 }
 
 void Game::updateWater(int _x, int _y) {
-	float t = m_particles[getIndex(_x, _y)].m_temp / 1000;
-	m_particles[getIndex(_x, _y)].m_color.x = mymath::lerp(20, 150, t);
-	m_particles[getIndex(_x, _y)].m_color.y = mymath::lerp(20, 150, t);
-	m_particles[getIndex(_x, _y)].m_color.z = mymath::lerp(130, 150, t);
+	float t = m_particles[getIndex(_x, _y)].m_temp;
+	float smooth;
 
+	if (t < 400) {
+		m_particles[getIndex(_x, _y)].m_color.x = 20;
+		m_particles[getIndex(_x, _y)].m_color.y = 20;
+		m_particles[getIndex(_x, _y)].m_color.z = 130;
+	} else if (t >= 400 && t < 500) {
+		smooth = (t - 400) / 100;
+		m_particles[getIndex(_x, _y)].m_color.x = mymath::lerp(20, 150, t);
+		m_particles[getIndex(_x, _y)].m_color.y = mymath::lerp(20, 150, t);
+		m_particles[getIndex(_x, _y)].m_color.z = mymath::lerp(130, 170, t);
+	} else if (t >= 500) {
+		m_particles[getIndex(_x, _y)].m_color.x = 150;
+		m_particles[getIndex(_x, _y)].m_color.y = 150;
+		m_particles[getIndex(_x, _y)].m_color.z = 170;
+	}
+
+
+	bool emptyTop = isEmpty(_x, _y + 1);
+	bool emptyTopLeft = isEmpty(_x - 1, _y + 1);
+	bool emptyTopRight = isEmpty(_x + 1, _y + 1);
 	bool emptyBottom = isEmpty(_x, _y - 1);
 	bool emptyBottomLeft = isEmpty(_x - 1, _y - 1);
 	bool emptyBottomRight = isEmpty(_x + 1, _y - 1);
 	bool emptyLeft = isEmpty(_x - 1, _y);
 	bool emptyRight = isEmpty(_x + 1, _y);
 
-	if (emptyBottom) {
-		storeChange(_x, _y, _x, _y - 1);
-		return;
-	}
+	int choice;
+	bool steamState = t >= 500 ? true : false;
+	switch (steamState) {
+	case true:
+		choice = m_dist(m_rg) % 3;
+		switch (choice) {
+		case 0:
+			if (emptyTopLeft)
+				storeChange(_x, _y, _x - 1, _y + 1);
+			else if (emptyLeft)
+				storeChange(_x, _y, _x - 1, _y);
+			break;
+		case 1:
+			if (emptyTopRight)
+				storeChange(_x, _y, _x + 1, _y + 1);
+			else if (emptyRight)
+				storeChange(_x, _y, _x + 1, _y);
+			break;
+		case 2:
+			if (emptyTop) {
+				storeChange(_x, _y, _x, _y + 1);
+				return;
+			}
 
-	int choice = rand() % 2;
-	switch (choice) {
-	case 0:
-		if (emptyBottomLeft) {
-			storeChange(_x, _y, _x - 1, _y - 1);
+			choice = m_dist(m_rg) % 2;
+			switch (choice) {
+			case 0:
+				if (emptyBottomLeft)
+					storeChange(_x, _y, _x - 1, _y - 1); break;
+			case 1:
+				if (emptyBottomRight)
+					storeChange(_x, _y, _x + 1, _y - 1); break;
+			}
+			break;
+		}
+		return;
+		break;
+	case false:
+		if (emptyBottom) {
+			storeChange(_x, _y, _x, _y - 1);
 			return;
-		} else if (emptyLeft) {
-			storeChange(_x, _y, _x - 1, _y);
-			return;
-		} break;
-	case 1:
-		if (emptyBottomRight) {
-			storeChange(_x, _y, _x + 1, _y - 1);
-			return;
-		} else if (emptyRight) {
-			storeChange(_x, _y, _x + 1, _y);
-			return;
-		} break;
+		}
+
+		choice = rand() % 2;
+		switch (choice) {
+		case 0:
+			if (emptyBottomLeft) {
+				storeChange(_x, _y, _x - 1, _y - 1);
+				return;
+			} else if (emptyLeft) {
+				storeChange(_x, _y, _x - 1, _y);
+				return;
+			} break;
+		case 1:
+			if (emptyBottomRight) {
+				storeChange(_x, _y, _x + 1, _y - 1);
+				return;
+			} else if (emptyRight) {
+				storeChange(_x, _y, _x + 1, _y);
+				return;
+			} break;
+		}
+		return;
+		break;
 	}
 }
 
@@ -206,7 +274,7 @@ void Game::updateFire(int _x, int _y) {
 	m_particles[getIndex(_x, _y)].m_color.z = mymath::lerp(20, 20, t);
 
 	if (m_particles[getIndex(_x, _y)].m_temp <= FIRE_MINTEMP) {
-		setEmpty(_x, _y);
+		extinguishFire(_x, _y);
 		return;
 	} 
 
@@ -292,30 +360,56 @@ void Game::updateSmoke(int _x, int _y) {
 }
 
 void Game::updateMetal(int _x, int _y) {
-	float t = (m_particles[getIndex(_x, _y)].m_temp) / 200;
+	float t = (m_particles[getIndex(_x, _y)].m_temp);
+	float smooth = t / 750.0f;
 
-	m_particles[getIndex(_x, _y)].m_color.x = mymath::lerp(70, 150, t);
-	m_particles[getIndex(_x, _y)].m_color.y = mymath::lerp(70, 110, t);
-	m_particles[getIndex(_x, _y)].m_color.z = mymath::lerp(70, 110, t);
+	if (t <= 295) {
+		m_particles[getIndex(_x, _y)].m_color.x = 70;
+		m_particles[getIndex(_x, _y)].m_color.y = 70;
+		m_particles[getIndex(_x, _y)].m_color.z = 70;
+	} else if (t > 295 && t < 500) {
+		smooth = t / 500;
+		m_particles[getIndex(_x, _y)].m_color.x = mymath::lerp(70, 230, smooth);
+		m_particles[getIndex(_x, _y)].m_color.y = 70;
+		m_particles[getIndex(_x, _y)].m_color.z = 70;
+	} else if (t >= 500 && t < 750) {
+		smooth = (t - 500) / 250;
+		m_particles[getIndex(_x, _y)].m_color.x = 230;
+		m_particles[getIndex(_x, _y)].m_color.y = mymath::lerp(70, 230, smooth);
+		m_particles[getIndex(_x, _y)].m_color.z = mymath::lerp(70, 230, smooth);
+	} else if (t >= 750) {
+		m_particles[getIndex(_x, _y)].m_color.x = 230;
+		m_particles[getIndex(_x, _y)].m_color.y = 230;
+		m_particles[getIndex(_x, _y)].m_color.z = 230;
+	}
 
-	//if (temp > 100) {
+	if (t < 690) {
+		return;
+	}
 
-		//m_particles[getIndex(_x, _y)].m_color.y = mymath::lerpU8(
-		//	temp, 0, 250, METAL_COLOR[0], 255);
-		//m_particles[getIndex(_x, _y)].m_color.z = mymath::lerpU8(
-		//	temp, 0, 250, METAL_COLOR[0], 255);
-	//}
+	bool emptyBottom = isEmpty(_x, _y - 1);
+	bool emptyBottomLeft = isEmpty(_x - 1, _y - 1);
+	bool emptyBottomRight = isEmpty(_x + 1, _y - 1);
 
-	//(*m_bPtr)[getIndex(_x, _y)].m_color.x = mymath::clampu8(temp);
-	
-
-	//if (temp < 100) {
-	//	m_particles[getIndex(_x, _y)].m_color.x = METAL_COLOR[0] + temp;
-	//} else {
-	//	m_particles[getIndex(_x, _y)].m_color.x = METAL_COLOR[0] + temp;
-	//	m_particles[getIndex(_x, _y)].m_color.y = METAL_COLOR[1] + temp;
-	//	m_particles[getIndex(_x, _y)].m_color.z = METAL_COLOR[2] + temp;
-	//}
+	int choice = m_dist(m_rg) % 3;
+	choice = m_dist(m_rg) % 3;
+	switch (choice) {
+	case 0:
+		if (emptyBottom) {
+			storeChange(_x, _y, _x, _y - 1);
+			return;
+		} break;
+	case 1:
+		if (emptyBottomLeft) {
+			storeChange(_x, _y, _x - 1, _y - 1);
+			return;
+		} break;
+	case 2:
+		if (emptyBottomRight) {
+			storeChange(_x, _y, _x + 1, _y - 1);
+			return;
+		} break;
+	}
 
 }
 
@@ -437,22 +531,17 @@ void Game::updateTorch(int _x, int _y) {
 }
 
 void Game::calcTemp(int _x, int _y) {
-		float c = getTemp(_x, _y);
+	float diff = T_CON(getId(_x, _y)) / (DENSITY(getId(_x, _y)) * S_HEAT(getId(_x, _y)));
+	float c = getTemp(_x, _y);
 	float t = getTemp(_x, _y + 1);
 	float l = getTemp(_x - 1, _y);
 	float r = getTemp(_x + 1, _y);
 	float b = getTemp(_x, _y - 1);
-
-	float diff = T_CON(getId(_x, _y)) / (DENSITY(getId(_x, _y)) * S_HEAT(getId(_x, _y)));
-	float tn1 = getTemp(_x, _y) + diff * (r + l - 4 * c + t + b);
+	float tn1 = c + diff * (r + l + t + b - 4 * c);
 	m_tempGrid[getIndex(_x, _y)] = static_cast<uint16_t>(tn1);
 
-	if (getId(_x, _y) == METAL) {
-		std::cout << "METAL " << tn1 << std::endl;
-	}
-
 	if (getId(_x, _y) == WATER) {
-		std::cout << "WATER " << tn1 << std::endl;
+		//std::cout << "WATER " << tn1 << std::endl;
 	}
 }
 

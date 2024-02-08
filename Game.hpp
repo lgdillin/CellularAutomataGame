@@ -63,6 +63,7 @@ public:
 	std::uniform_int_distribution<int> m_dWater;
 	std::uniform_int_distribution<int> m_dFire;
 
+	int dummy = 0;
 	int m_brushSize;
 	int m_mousex;
 	int m_mousey;
@@ -114,6 +115,14 @@ public:
 		m_particles[getIndex(_x, _y)].m_color.y = 0;
 		m_particles[getIndex(_x, _y)].m_color.z = 0;
 	}
+	
+	void extinguishFire(int _x, int _y) {
+		m_particles[getIndex(_x, _y)].m_id = EMPTY;
+		m_particles[getIndex(_x, _y)].m_temp = getTemp(_x, _y);
+		m_particles[getIndex(_x, _y)].m_color.x = 0;
+		m_particles[getIndex(_x, _y)].m_color.y = 0;
+		m_particles[getIndex(_x, _y)].m_color.z = 0;
+	}
 
 	void pSwap(size_t _idx1, size_t _idx2) {
 		m_particles[_idx1].m_id = m_particles[_idx2].m_id;
@@ -150,7 +159,7 @@ public:
 			return 1;
 			break;
 		case METAL:
-			return 80.0f;
+			return 10.0f;
 			break;
 		case STEAM:
 			return 1;
@@ -176,7 +185,7 @@ public:
 			return 75;
 			break;
 		case WATER:
-			return 4186.0f;
+			return 1005.0f;;
 			break;
 		case FIRE:
 			return 1003.0f;
@@ -185,7 +194,7 @@ public:
 			return 1;
 			break;
 		case METAL:
-			return 449.0f;
+			return 1005.0f;
 			break;
 		case STEAM:
 			return 1;
@@ -211,7 +220,7 @@ public:
 			return 75;
 			break;
 		case WATER:
-			return 1000.0f;
+			return 3.2f;
 			break;
 		case FIRE:
 			return 1.1f;
@@ -220,7 +229,7 @@ public:
 			return 1;
 			break;
 		case METAL:
-			return 7870.0f;
+			return 2;
 			break;
 		case STEAM:
 			return 1;
