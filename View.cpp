@@ -29,8 +29,14 @@ void View::repaint() {
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	updateTexture();
-	
+	switch (m_controller->m_visualMode) {
+	case false:
+		updateTexture();
+		break;
+	case true:
+		visualizeHeatmap();
+		break;
+	}
 
 	glUseProgram(m_shaderId);
 	glActiveTexture(GL_TEXTURE0);
@@ -48,6 +54,21 @@ void View::repaint() {
 	glBindTexture(GL_TEXTURE_2D, 0);
 
 	SDL_GL_SwapWindow(m_mainWindow);
+}
+
+void View::visualizeHeatmap() {
+	std::vector<Particle> *ptr = &m_game->m_particles;
+	for (int i = 0; i < TEXTURE_ROWS * TEXTURE_COLS; ++i) {
+		m_pColors[3 * i] = mymath::lerp(0, 255, ((*ptr)[i].m_temp - 295) / 2201.0f);
+		m_pColors[3 * i + 1] = 0;
+		m_pColors[3 * i + 2] = 0;
+
+	}
+
+	glBindTexture(GL_TEXTURE_2D, m_textureId);
+	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, TEXTURE_COLS, TEXTURE_ROWS, GL_RGB,
+		GL_UNSIGNED_BYTE, m_pColors.data());
+	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 void View::updateTexture() {

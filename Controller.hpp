@@ -19,6 +19,8 @@ public:
 	//void mouseDown(SDL_)
 	void keyDown(SDL_KeyboardEvent *_event);
 	void keyUp(SDL_KeyboardEvent *_event);
+
+	bool m_visualMode;
 private:
 	int m_particleChoice;
 

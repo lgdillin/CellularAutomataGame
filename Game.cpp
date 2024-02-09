@@ -18,6 +18,20 @@ Game::Game() {
 	m_mousex = 0;
 	m_mousey = 0;
 	m_brushSize = 1;
+	for (int row = 0; row < TEXTURE_ROWS; ++row) {
+		for (int col = 0; col < TEXTURE_COLS; ++col) {
+			if (row == 0 || col == 0 || row == TEXTURE_ROWS - 1 || col == TEXTURE_COLS - 1) {
+				m_particles[row * TEXTURE_ROWS + col].m_id = OOB;
+				m_particles[row * TEXTURE_ROWS + col].m_temp = 295;
+				m_particles[row * TEXTURE_ROWS + col].m_color.x = 255;
+				m_particles[row * TEXTURE_ROWS + col].m_color.y = 255;
+				m_particles[row * TEXTURE_ROWS + col].m_color.z = 255;
+
+				// initialize border tempgrid
+				m_tempGrid[row * TEXTURE_ROWS + col] = 295;
+			}
+		}
+	}
 }
 
 Game::~Game() {
@@ -30,8 +44,15 @@ void Game::initialize() {
 void Game::update2() {
 	for (int i = 0; i < TEXTURE_ROWS; ++i) {
 		for (int j = 0; j < TEXTURE_COLS; ++j) {
+			if (i == 0 || j == 0 || j == TEXTURE_COLS - 1 || i == TEXTURE_ROWS - 1)
+				continue;
+
 			switch (m_particles[j * TEXTURE_ROWS + i].m_id) {
+			case OOB:
+				std::cout << "no" << std::endl;
+				break;
 			case EMPTY:
+				//updateEmpty(i, j);
 				break;
 			case WALL:
 				break;
@@ -60,50 +81,7 @@ void Game::update2() {
 	commitUpdate();
 }
 
-void Game::update3() {
-	int row = 0;
-	for (int i = 0; i < m_particles.size(); ++i) {
-		int col = i % TEXTURE_COLS;
-		if (i != 0 && col == 0) {
-			++row;
-		}
-
-		switch (m_particles[i].m_id) {
-		case EMPTY:
-			break;
-		case WALL:
-			break;
-		case SAND:
-			updateSand(col, row);
-			break;
-		case WATER:
-			updateWater(col, row);
-			break;
-		case FIRE:
-			updateFire(col, row);
-			break;
-		case METAL:
-			//std::cout << i << ", " << j << std::endl;
-			updateMetal(col, row);
-			break;
-
-		case TORCH:
-			updateTorch(col, row);
-			break;
-		}
-	}
-
-	commitUpdate();
-}
-
 void Game::commitUpdate() {
-	//for (size_t i = 0; i < m_changes.size(); ++i) {
-	//	if (m_particles[m_changes[i].first].m_id != EMPTY) {
-	//		m_changes[i] = m_changes.back(); m_changes.pop_back();
-	//		--i;
-	//	}
-	//}
-
 	std::sort(m_changes.begin(), m_changes.end(),
 		[](auto &a, auto &b) { return a.first < b.first; }
 	);
@@ -129,28 +107,76 @@ void Game::commitUpdate() {
 		}
 	}
 	m_changes.clear();
-	
-	// update temps
-	int row = 0;
-	float diff, c, t, l, r, b, tn1;
-	for (int i = 0; i < m_particles.size(); ++i) {
-		int col = i % TEXTURE_COLS;
-		if (i != 0 && col == 0) {
-			++row;
-		}
 
-		diff = T_CON(m_particles[i].m_id) / DENSITY(m_particles[i].m_id);
-		c = getTemp(col, row);
-		t = getTemp(col, row + 1);
-		l = getTemp(col - 1, row);
-		r = getTemp(col + 1, row);
-		b = getTemp(col, row - 1);
-		tn1 = c + diff * (r + l + t + b - 4 * c);
+	updateTemps();
+}
+
+void Game::updateTemps() {
+	float diff, c, t, l, r, b, tn1;
+	float tl, tr, bl, br;
+	for (int row = 0; row < TEXTURE_ROWS; ++row) {
+		for (int col = 0; col < TEXTURE_COLS; ++col) {
+			if (row == 0 || col == 0 || row == TEXTURE_ROWS - 1 || col == TEXTURE_COLS - 1)
+				continue;
+
+			diff = T_CON(m_particles[getIndex(col, row)].m_id)
+				/ (DENSITY(m_particles[getIndex(col, row)].m_id) * 1000.0f);
+
+			tl = getTemp2(col - 1, row + 1);
+			tr = getTemp2(col + 1, row + 1);
+			bl = getTemp2(col - 1, row - 1);
+			br = getTemp2(col + 1, row - 1);
+
+			c = getTemp2(col, row);
+			t = getTemp2(col, row + 1);
+			l = getTemp2(col - 1, row);
+			r = getTemp2(col + 1, row);
+			b = getTemp2(col, row - 1);
+			//tn1 = c + diff * ((1.0f * r) + (1.0f * l) + (1.0f * t) +
+			//	(1.0f * b) - 4.0f * c) * (1.0f / 0.9f);
+
+			tn1 = (c + tl + t + tr + l + r + bl + b + br) / 9.0f;
+			m_tempGrid[row * TEXTURE_ROWS + col] = static_cast<uint16_t>(tn1);
+
+			//if (col == TEXTURE_ROWS / 2 && row == TEXTURE_COLS / 2) {
+			//	std::cout << "center " << tn1 << std::endl;
+			//}
+
+			//if (col == 0 && row == 0) {
+			//	std::cout << "OOB corner " << tn1 << std::endl;
+			//}
+		}
 	}
 
-	//for (int i = 0; i < m_particles.size(); ++i) {
-	//	m_particles[i].m_temp = m_tempGrid[i];
-	//}
+	for (int i = 0; i < m_particles.size(); ++i) {
+		m_particles[i].m_temp = m_tempGrid[i];
+	}
+}
+
+void Game::updateEmpty(int _x, int _y) {
+	float t = m_particles[getIndex(_x, _y)].m_temp;
+	bool emptyTop = isEmpty(_x, _y + 1);
+	bool emptyTopLeft = isEmpty(_x - 1, _y + 1);
+	bool emptyTopRight = isEmpty(_x + 1, _y + 1);
+
+	int choice = m_dist(m_rg) % 3;
+	switch (choice) {
+	case 0:
+		if (emptyTop && t > getTemp2(_x, _y + 1)) {
+			storeChange(_x, _y, _x, _y + 1);
+			return;
+		} break;
+	case 1:
+		if (emptyTopLeft && getTemp2(_x - 1, _y + 1)) {
+			storeChange(_x, _y, _x - 1, _y + 1);
+			return;
+		} break;
+	case 2:
+		if (emptyTopRight && getTemp2(_x + 1, _y + 1)) {
+			storeChange(_x, _y, _x + 1, _y + 1);
+			return;
+		} break;
+	}
 }
 
 void Game::updateSand(int _x, int _y) {
@@ -214,6 +240,7 @@ void Game::updateSand(int _x, int _y) {
 }
 
 void Game::updateWater(int _x, int _y) {
+	int choice;
 	float t = m_particles[getIndex(_x, _y)].m_temp;
 	float smooth;
 
@@ -232,6 +259,32 @@ void Game::updateWater(int _x, int _y) {
 		m_particles[getIndex(_x, _y)].m_color.z = 170;
 	}
 
+	bool waterTop = isWater(_x, _y + 1);
+	bool waterTopLeft = isWater(_x - 1, _y + 1);
+	bool waterTopRight = isWater(_x + 1, _y + 1);
+	//choice = m_dist(m_rg) % 3;
+	//switch (choice) {
+	//case 0:
+	//	if (waterTop && t > getTemp2(_x, _y + 1)) {
+	//		storeChange(_x, _y, _x, _y + 1);
+	//		return;
+	//	}
+	//	break;
+	//case 1:
+	//	if (waterTopLeft && t > getTemp2(_x - 1, _y + 1)) {
+	//		storeChange(_x, _y, _x - 1, _y + 1);
+	//		return;
+	//	}
+	//	break;
+	//case 2:
+	//	if (waterTopRight && t > getTemp(_x + 1, _y + 1)) {
+	//		storeChange(_x, _y, _x + 1, _y + 1);
+	//		return;
+	//	}
+	//	break;
+	//}
+
+
 
 	bool emptyTop = isEmpty(_x, _y + 1);
 	bool emptyTopLeft = isEmpty(_x - 1, _y + 1);
@@ -242,26 +295,29 @@ void Game::updateWater(int _x, int _y) {
 	bool emptyLeft = isEmpty(_x - 1, _y);
 	bool emptyRight = isEmpty(_x + 1, _y);
 
-	int choice;
+	// The get temp thing isn't working because getTemp2 doesn't check 
+	// if the ids match. so we have to nest the temp check inside the id check,
+	// or just make a whole function
+	
 	bool steamState = t >= 500 ? true : false;
 	switch (steamState) {
 	case true:
 		choice = m_dist(m_rg) % 3;
 		switch (choice) {
 		case 0:
-			if (emptyTopLeft)
+			if (emptyTopLeft || (waterTopLeft && t > getTemp2(_x - 1, _y + 1)))
 				storeChange(_x, _y, _x - 1, _y + 1);
 			else if (emptyLeft)
 				storeChange(_x, _y, _x - 1, _y);
 			break;
 		case 1:
-			if (emptyTopRight)
+			if (emptyTopRight || (waterTopRight && t > getTemp(_x + 1, _y + 1)))
 				storeChange(_x, _y, _x + 1, _y + 1);
 			else if (emptyRight)
 				storeChange(_x, _y, _x + 1, _y);
 			break;
 		case 2:
-			if (emptyTop) {
+			if (emptyTop || (waterTop && t > getTemp2(_x, _y + 1))) {
 				storeChange(_x, _y, _x, _y + 1);
 				return;
 			}
@@ -304,7 +360,26 @@ void Game::updateWater(int _x, int _y) {
 				return;
 			} break;
 		}
-		return;
+		
+		choice = rand() % 3;
+		switch (choice) {
+		case 0:
+			if (waterTop && t > getTemp2(_x, _y + 1)) {
+				storeChange(_x, _y, _x, _y + 1);
+				return;
+			} break;
+		case 1:
+			if (waterTopRight && t > getTemp2(_x + 1, _y + 1)) {
+				storeChange(_x, _y, _x + 1, _y + 1);
+				return;
+			} break;
+		case 2:
+			if (waterTopLeft && t > getTemp2(_x - 1, _y + 1)) {
+				storeChange(_x, _y, _x - 1, _y + 1);
+				return;
+			} break;
+		
+		}
 		break;
 	}
 }

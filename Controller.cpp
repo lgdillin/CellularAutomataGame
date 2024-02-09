@@ -2,6 +2,7 @@
 
 Controller::Controller(Game &_game) : m_game(&_game) {
 	m_particleChoice = 0;
+	m_visualMode = false;
 }
 
 Controller::~Controller() {
@@ -54,6 +55,10 @@ void Controller::keyDown(SDL_KeyboardEvent *_event) {
 			if (m_game->m_brushSize >= MIN_BRUSH_SIZE) {
 				m_game->m_brushSize -= 2;
 			}
+		}
+
+		if (_event->keysym.scancode == SDL_SCANCODE_M) {
+			m_visualMode = !m_visualMode;
 		}
 
 		if (_event->keysym.scancode == SDL_SCANCODE_1) {

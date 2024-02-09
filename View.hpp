@@ -20,6 +20,7 @@ public:
 
 	void repaint();
 
+	void visualizeHeatmap();
 	void updateTexture();
 
 	void initialize();

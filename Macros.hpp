@@ -5,11 +5,11 @@
 #include <bitset>
 #include <cstddef>
 
-#define SCREEN_WIDTH 1000
-#define SCREEN_HEIGHT 1000
+#define SCREEN_WIDTH 800
+#define SCREEN_HEIGHT 600
 
-#define TEXTURE_ROWS 1000
-#define TEXTURE_COLS 1000
+#define TEXTURE_ROWS 300
+#define TEXTURE_COLS 300
 
 #define MAX_U8BIT 255
 #define MAX_U16BIT 65535
@@ -27,7 +27,6 @@
 #define METAL 6
 #define STEAM 7
 #define TORCH 8
-#define MOLTENMETAL 9
 
 constexpr uint16_t EMPTY_BASETEMP = 295;
 constexpr uint16_t WALL_BASETEMP = 295;
@@ -45,7 +44,7 @@ constexpr uint16_t TORCH_BASETEMP = 2200;
 #define EMPTY_MAXTEMP 255
 #define FIRE_MAXTEMP 1000
 #define WALL_MAXTEMP 255
-#define SAND_MAXTEMP 200
+#define SAND_MAXTEMP 295
 #define WATER_MAXTEMP 100
 #define SMOKE_MAXTEMP 254
 #define METAL_MAXTEMP 200
@@ -102,7 +101,7 @@ constexpr float T_CON(uint8_t _id) {
 		return 0.06f;
 		break;
 	case OOB:
-		return 0.0257;
+		return 0.0257f;
 		break;
 	}
 }
@@ -116,7 +115,7 @@ constexpr float DENSITY(int _id) {
 		return 1;
 		break;
 	case SAND:
-		return 75;
+		return 10;
 		break;
 	case WATER:
 		return 3.2f;
@@ -128,7 +127,7 @@ constexpr float DENSITY(int _id) {
 		return 1;
 		break;
 	case METAL:
-		return 2;
+		return 10;
 		break;
 	case STEAM:
 		return 1;
@@ -137,7 +136,7 @@ constexpr float DENSITY(int _id) {
 		return 1.05f;
 		break;
 	case OOB:
-		return 1.005f;
+		return 1.225f;
 		break;
 	}
 }

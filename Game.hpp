@@ -25,10 +25,12 @@ public:
 	void initialize();
 
 	void update2();
-	void update3();
 	void commitUpdate();
+	void updateTemps();
 
 	//void updateTemp(int _x, int _y);
+
+	void updateEmpty(int _x, int _y);
 
 	void updateSand(int _x, int _y);
 
@@ -101,15 +103,30 @@ public:
 		return inBounds(_x, _y) ? m_particles[getIndex(_x, _y)].m_id : 255;
 	}
 
+	uint16_t boundaryTemp(int _xb, int _yb, int _x, int _y) {
+		switch (inBounds(_xb, _yb)) {
+		case true:
+			return m_particles[getIndex(_xb, _yb)].m_temp;
+			break;
+		case false:
+			return m_particles[getIndex(_x, _y)].m_temp;;
+			break;
+		}
+	}
+
 	uint16_t getTemp(int _x, int _y) {
 		switch (inBounds(_x, _y)) {
 		case true:
 			return m_particles[getIndex(_x, _y)].m_temp;
 			break;
 		case false:
-			return EMPTY_BASETEMP;
+			return 0;
 			break;
 		}
+	}
+
+	uint16_t getTemp2(int _col, int _row) {
+		return m_particles[_row * TEXTURE_ROWS + _col].m_temp;
 	}
 
 	void storeChange(int _x1, int _y1, int _x2, int _y2) {
