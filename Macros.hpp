@@ -23,9 +23,9 @@
 #define SAND 2
 #define WATER 3
 #define FIRE 4
-#define SMOKE 5
+#define ACID 5
 #define METAL 6
-#define STEAM 7
+#define SEEDS 7
 #define TORCH 8
 
 constexpr uint16_t EMPTY_BASETEMP = 295;
@@ -38,7 +38,7 @@ constexpr uint16_t METAL_BASETEMP = 295;
 constexpr uint16_t STEAM_BASETEMP = 295;
 constexpr uint16_t TORCH_BASETEMP = 2200;
 
-#define FIRE_MINTEMP 1900
+#define FIRE_MINTEMP 1700
 #define SMOKE_MINTEMP 70
 
 #define EMPTY_MAXTEMP 255
@@ -71,72 +71,32 @@ constexpr uint8_t FIRE_B[2] = { 25, 20 };
 
 constexpr uint8_t METAL_R[2] = { 70, 230 };
 
-constexpr float T_CON(uint8_t _id) {
+constexpr float THERM_COEF(uint8_t _id) {
 	switch (_id) {
 	case EMPTY:
-		return 0.0257f;
+		return 0.07f;
 		break;
 	case WALL:
-		return 1;
+		return 0.5f;
 		break;
 	case SAND:
-		return 3;
+		return 1.0f;
 		break;
 	case WATER:
-		return 0.606f;
+		return 0.06f;
 		break;
 	case FIRE:
-		return 0.06f;
-		break;
-	case SMOKE:
-		return 1;
+		return 1.0f;
 		break;
 	case METAL:
-		return 10.0f;
-		break;
-	case STEAM:
-		return 1;
+		return 1.15f;
 		break;
 	case TORCH:
-		return 0.06f;
+		return 1.0f;
 		break;
 	case OOB:
-		return 0.0257f;
+		return 1.0f;
 		break;
 	}
 }
 
-constexpr float DENSITY(int _id) {
-	switch (_id) {
-	case EMPTY:
-		return 1.225f;
-		break;
-	case WALL:
-		return 1;
-		break;
-	case SAND:
-		return 10;
-		break;
-	case WATER:
-		return 3.2f;
-		break;
-	case FIRE:
-		return 1.1f;
-		break;
-	case SMOKE:
-		return 1;
-		break;
-	case METAL:
-		return 10;
-		break;
-	case STEAM:
-		return 1;
-		break;
-	case TORCH:
-		return 1.05f;
-		break;
-	case OOB:
-		return 1.225f;
-		break;
-	}
-}

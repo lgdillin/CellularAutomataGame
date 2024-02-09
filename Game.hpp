@@ -37,9 +37,7 @@ public:
 	void updateWater(int _x, int _y);
 
 	void updateFire(int _x, int _y);
-	void updateSmoke(int _x, int _y);
 	void updateMetal(int _x, int _y);
-	void updateSteam(int _x, int _y);
 	void updateTorch(int _x, int _y);
 
 	//void calcTemp(int _x, int _y);
@@ -50,9 +48,7 @@ public:
 	void sand(int _x, int _y);
 	void water(int _x, int _y);
 	void fire(int _x, int _y);
-	void smoke(int _x, int _y);
 	void metal(int _x, int _y);
-	void steam(int _x, int _y);
 	void torch(int _x, int _y);
 
 	std::vector<Particle> m_particles;
@@ -92,26 +88,11 @@ public:
 	}
 
 	bool isWater(int _x, int _y) {
-		return inBounds(_x, _y) && m_particles[getIndex(_x, _y)].m_id == WATER;
-	}
-
-	bool isSmoke(int _x, int _y) {
-		return inBounds(_x, _y) && m_particles[getIndex(_x, _y)].m_id == SMOKE;
+		return m_particles[getIndex(_x, _y)].m_id == WATER;
 	}
 
 	uint8_t getId(int _x, int _y) {
-		return inBounds(_x, _y) ? m_particles[getIndex(_x, _y)].m_id : 255;
-	}
-
-	uint16_t boundaryTemp(int _xb, int _yb, int _x, int _y) {
-		switch (inBounds(_xb, _yb)) {
-		case true:
-			return m_particles[getIndex(_xb, _yb)].m_temp;
-			break;
-		case false:
-			return m_particles[getIndex(_x, _y)].m_temp;;
-			break;
-		}
+		return m_particles[getIndex(_x, _y)].m_id;
 	}
 
 	uint16_t getTemp(int _x, int _y) {
