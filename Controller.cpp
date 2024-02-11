@@ -25,6 +25,7 @@ void Controller::update() {
 		//case SDL_MOUSEBUTTONDOWN:
 			//m_game->addParticle();
 			//event.
+			break;
 		case SDL_KEYDOWN:
 			keyDown(&event.key);
 			break;
@@ -83,6 +84,10 @@ void Controller::keyDown(SDL_KeyboardEvent *_event) {
 
 		if (_event->keysym.scancode == SDL_SCANCODE_6) {
 			m_game->m_selectedParticle = TORCH;
+		}
+
+		if (_event->keysym.scancode == SDL_SCANCODE_7) {
+			m_game->m_selectedParticle = ACID;
 		}
 	}
 }

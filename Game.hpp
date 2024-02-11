@@ -37,7 +37,11 @@ public:
 	void updateWater(int _x, int _y);
 
 	void updateFire(int _x, int _y);
+
 	void updateMetal(int _x, int _y);
+
+	void updateAcid(int _x, int _y);
+
 	void updateTorch(int _x, int _y);
 
 	//void calcTemp(int _x, int _y);
@@ -49,6 +53,7 @@ public:
 	void water(int _x, int _y);
 	void fire(int _x, int _y);
 	void metal(int _x, int _y);
+	void acid(int _x, int _y);
 	void torch(int _x, int _y);
 
 	std::vector<Particle> m_particles;
@@ -91,19 +96,12 @@ public:
 		return m_particles[getIndex(_x, _y)].m_id == WATER;
 	}
 
-	uint8_t getId(int _x, int _y) {
-		return m_particles[getIndex(_x, _y)].m_id;
+	bool isAcid(int _x, int _y) {
+		return m_particles[getIndex(_x, _y)].m_id == ACID;
 	}
 
-	uint16_t getTemp(int _x, int _y) {
-		switch (inBounds(_x, _y)) {
-		case true:
-			return m_particles[getIndex(_x, _y)].m_temp;
-			break;
-		case false:
-			return 0;
-			break;
-		}
+	uint8_t getId(int _x, int _y) {
+		return m_particles[getIndex(_x, _y)].m_id;
 	}
 
 	uint16_t getTemp2(int _col, int _row) {
@@ -121,10 +119,14 @@ public:
 		m_particles[getIndex(_x, _y)].m_color.y = 0;
 		m_particles[getIndex(_x, _y)].m_color.z = 0;
 	}
+
+	void dissolveAcid(int _xa, int _ya, int _xp, int _yp) {
+
+	}
 	
 	void extinguishFire(int _x, int _y) {
 		m_particles[getIndex(_x, _y)].m_id = EMPTY;
-		m_particles[getIndex(_x, _y)].m_temp = getTemp(_x, _y);
+		m_particles[getIndex(_x, _y)].m_temp = getTemp2(_x, _y);
 		m_particles[getIndex(_x, _y)].m_color.x = 0;
 		m_particles[getIndex(_x, _y)].m_color.y = 0;
 		m_particles[getIndex(_x, _y)].m_color.z = 0;
@@ -143,17 +145,6 @@ public:
 		m_particles[_idx2].m_color.z = m_particles[_idx1].m_color.z;
 		m_particles[_idx2].m_temp = m_particles[_idx1].m_temp;
 	}
-
-	//void calcTemp(int _x, int _y) {
-	//	float diff = T_CON(getId(_x, _y)) / (DENSITY(getId(_x, _y)) * S_HEAT(getId(_x, _y)));
-	//	float c = getTemp(_x, _y);
-	//	float t = getTemp(_x, _y + 1);
-	//	float l = getTemp(_x - 1, _y);
-	//	float r = getTemp(_x + 1, _y);
-	//	float b = getTemp(_x, _y - 1);
-	//	float tn1 = c + diff * (r + l + t + b - 4 * c);
-	//	//m_tempGrid[getIndex(_x, _y)] = static_cast<uint16_t>(tn1);
-	//}
 
 
 private:

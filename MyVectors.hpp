@@ -48,6 +48,10 @@ namespace mymath {
 		return _x < _y ? _x : _y;
 	}
 
+	static inline uint16_t minu16(uint16_t _x, uint16_t _y) {
+		return _x < _y ? _x : _y;
+	}
+
 	static inline uint8_t max(uint8_t _x, uint8_t _y) {
 		return _x > _y ? _x : _y;
 	}

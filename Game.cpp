@@ -66,8 +66,10 @@ void Game::update2() {
 				updateFire(i, j);
 				break;
 			case METAL:
-				//std::cout << i << ", " << j << std::endl;
 				updateMetal(i, j);
+				break;
+			case ACID:
+				updateAcid(i, j);
 				break;
 
 			case TORCH:
@@ -130,11 +132,6 @@ void Game::updateTemps() {
 			r = getTemp2(col + 1, row);
 			b = getTemp2(col, row - 1);
 
-			//float coef = THERM_COEF(getId(col, row));
-			//float coef1 = coef + 1;
-			//float coef2 = 1 - coef;
-			//tn1 = (coef1 * c +  coef2 * (tl + t + tr + l + r + bl + b + br)) 
-			//	/ (coef1 + 8 * coef2);
 			tn1 = (c + (tl + t + tr + l + r + bl + b + br))
 				/ (9.0f);
 			float delta_t = tn1 - c;
@@ -311,7 +308,7 @@ void Game::updateWater(int _x, int _y) {
 				storeChange(_x, _y, _x - 1, _y);
 			break;
 		case 1:
-			if (emptyTopRight || (waterTopRight && t > getTemp(_x + 1, _y + 1)))
+			if (emptyTopRight || (waterTopRight && t > getTemp2(_x + 1, _y + 1)))
 				storeChange(_x, _y, _x + 1, _y + 1);
 			else if (emptyRight)
 				storeChange(_x, _y, _x + 1, _y);
@@ -509,6 +506,70 @@ void Game::updateMetal(int _x, int _y) {
 
 }
 
+void Game::updateAcid(int _x, int _y) {
+	bool topLeft = !isEmpty(_x - 1, _y + 1) && isAcid(_x - 1, _y + 1);
+	bool top = !isEmpty(_x, _y + 1) && isAcid(_x, _y + 1);
+	bool topRight = !isEmpty(_x + 1, _y + 1) && isAcid(_x + 1, _y + 1);
+	bool left = !isEmpty(_x - 1, _y) && isAcid(_x - 1, _y);
+	bool right = !isEmpty(_x + 1, _y) && isAcid(_x + 1, _y);
+	bool bottom = !isEmpty(_x, _y - 1) && isAcid(_x, _y - 1);
+	bool bottomLeft = !isEmpty(_x - 1, _y - 1) && isAcid(_x - 1, _y - 1);
+	bool bottomRight = !isEmpty(_x + 1, _y - 1) && isAcid(_x + 1, _y - 1);
+
+	int maxTemp = 1000;
+	uint16_t t = m_particles[getIndex(_x, _y)].m_temp;
+	if (!topLeft || !top || !topRight || !left || !right
+		|| !bottom || !bottomLeft || bottomRight
+	) {
+		m_particles[getIndex(_x, _y)].m_temp = mymath::minu16(t + 15, 1000);
+	}
+
+	if (t >= 1000) {
+		std::bitset<8> bits(0b00000000);
+		if (topLeft) bits.set(0);
+		if (top) bits.set(1);
+		if (topRight) bits.set(2);
+		if (left) bits.set(3);
+		if (right) bits.set(4);
+		if (bottomLeft) bits.set(5);
+		if (bottom) bits.set(6);
+		if (bottomRight) bits.set(7);
+	}
+
+	bool emptyLeft = isEmpty(_x - 1, _y);
+	bool emptyRight = isEmpty(_x + 1, _y);
+	bool emptyBottom = isEmpty(_x, _y - 1);
+	bool emptyBottomLeft = isEmpty(_x - 1, _y - 1);
+	bool emptyBottomRight = isEmpty(_x + 1, _y - 1);
+	int choice = m_dist(m_rg) % 3;
+	switch (choice) {
+	case 0:
+		if (emptyBottom) {
+			storeChange(_x, _y, _x, _y - 1);
+			return;
+		} 
+		break;
+	case 1:
+		if (emptyBottomLeft) {
+			storeChange(_x, _y, _x - 1, _y - 1);
+			return;
+		} else if (emptyLeft) {
+			storeChange(_x, _y, _x - 1, _y);
+			return;
+		}
+		break;
+	case 2:
+		if (emptyBottomRight) {
+			storeChange(_x, _y, _x + 1, _y - 1);
+			return;
+		} else if (emptyRight) {
+			storeChange(_x, _y, _x + 1, _y);
+			return;
+		}
+		break;
+	}
+}
+
 void Game::updateTorch(int _x, int _y) {
 	if (isEmpty(_x - 1, _y + 1))
 		fire(_x - 1, _y + 1);
@@ -562,17 +623,14 @@ void Game::brush() {
 			case FIRE:
 				fire(x + i, y + j);
 				break;
-			case SMOKE:
-				smoke(x + i, y + j);
-				break;
 			case METAL:
 				metal(x + i, y + j);
 				break;
-			case STEAM:
-				steam(x + i, y + j);
-				break;
 			case TORCH:
 				torch(x + i, y + j);
+				break;
+			case ACID:
+				acid(x + i, y + j);
 				break;
 			default:
 				break;
@@ -615,15 +673,6 @@ void Game::fire(int _x, int _y) {
 	m_particles[getIndex(_x, _y)].m_color.z = FIRE_COLOR[2];
 }
 
-void Game::smoke(int _x, int _y) {
-	uint8_t c = static_cast<uint8_t>(m_dWall(m_rg));
-	m_particles[getIndex(_x, _y)].m_id = SMOKE;
-	m_particles[getIndex(_x, _y)].m_temp = SMOKE_BASETEMP;
-	m_particles[getIndex(_x, _y)].m_color.x = SMOKE_COLOR[0];
-	m_particles[getIndex(_x, _y)].m_color.y = SMOKE_COLOR[1];
-	m_particles[getIndex(_x, _y)].m_color.z = SMOKE_COLOR[2];
-}
-
 void Game::metal(int _x, int _y) {
 	uint8_t c = static_cast<uint8_t>(m_dWall(m_rg));
 	m_particles[getIndex(_x, _y)].m_id = METAL;
@@ -633,12 +682,12 @@ void Game::metal(int _x, int _y) {
 	m_particles[getIndex(_x, _y)].m_color.z = METAL_COLOR[2];
 }
 
-void Game::steam(int _x, int _y) {
-	m_particles[getIndex(_x, _y)].m_id = STEAM;
-	m_particles[getIndex(_x, _y)].m_temp = STEAM_BASETEMP;
-	m_particles[getIndex(_x, _y)].m_color.x = 100;
-	m_particles[getIndex(_x, _y)].m_color.y = 100;
-	m_particles[getIndex(_x, _y)].m_color.z = 180;
+void Game::acid(int _x, int _y) {
+	m_particles[getIndex(_x, _y)].m_id = ACID;
+	m_particles[getIndex(_x, _y)].m_temp = ACID_BASETEMP;
+	m_particles[getIndex(_x, _y)].m_color.x = ACID_COLOR[0];
+	m_particles[getIndex(_x, _y)].m_color.y = ACID_COLOR[1];
+	m_particles[getIndex(_x, _y)].m_color.z = ACID_COLOR[2];
 }
 
 void Game::torch(int _x, int _y) {

@@ -1,8 +1,8 @@
 ﻿  Controller.cpp
-C:\Users\liamd\OneDrive\Documents\Visual Studio Projects\CellularAutomataGame\MyVectors.hpp(60,18): warning C4244: 'argument': conversion from 'uint16_t' to 'uint8_t', possible loss of data
+C:\Users\liamd\OneDrive\Documents\Visual Studio Projects\CellularAutomataGame\MyVectors.hpp(64,18): warning C4244: 'argument': conversion from 'uint16_t' to 'uint8_t', possible loss of data
   (compiling source file 'Controller.cpp')
   
-C:\Users\liamd\OneDrive\Documents\Visual Studio Projects\CellularAutomataGame\MyVectors.hpp(71,33): warning C4244: 'argument': conversion from 'float' to 'uint8_t', possible loss of data
+C:\Users\liamd\OneDrive\Documents\Visual Studio Projects\CellularAutomataGame\MyVectors.hpp(75,33): warning C4244: 'argument': conversion from 'float' to 'uint8_t', possible loss of data
   (compiling source file 'Controller.cpp')
   
 C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include\utility(250,16): warning C4267: 'initializing': conversion from 'size_t' to '_Ty1', possible loss of data
@@ -13,7 +13,7 @@ C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.3313
   (compiling source file 'Controller.cpp')
   C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include\utility(250,16):
   the template instantiation context (the oldest one first) is
-  	C:\Users\liamd\OneDrive\Documents\Visual Studio Projects\CellularAutomataGame\Game.hpp(116,12):
+  	C:\Users\liamd\OneDrive\Documents\Visual Studio Projects\CellularAutomataGame\Game.hpp(112,12):
   	see reference to function template instantiation '_Ty &std::vector<_Ty,std::allocator<_Ty>>::emplace_back<size_t,size_t>(size_t &&,size_t &&)' being compiled
           with
           [
@@ -54,13 +54,13 @@ C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.3313
   (compiling source file 'Controller.cpp')
   
   Game.cpp
-C:\Users\liamd\OneDrive\Documents\Visual Studio Projects\CellularAutomataGame\MyVectors.hpp(60,18): warning C4244: 'argument': conversion from 'uint16_t' to 'uint8_t', possible loss of data
+C:\Users\liamd\OneDrive\Documents\Visual Studio Projects\CellularAutomataGame\MyVectors.hpp(64,18): warning C4244: 'argument': conversion from 'uint16_t' to 'uint8_t', possible loss of data
   (compiling source file 'Game.cpp')
   
-C:\Users\liamd\OneDrive\Documents\Visual Studio Projects\CellularAutomataGame\MyVectors.hpp(71,33): warning C4244: 'argument': conversion from 'float' to 'uint8_t', possible loss of data
+C:\Users\liamd\OneDrive\Documents\Visual Studio Projects\CellularAutomataGame\MyVectors.hpp(75,33): warning C4244: 'argument': conversion from 'float' to 'uint8_t', possible loss of data
   (compiling source file 'Game.cpp')
   
-C:\Users\liamd\OneDrive\Documents\Visual Studio Projects\CellularAutomataGame\Game.cpp(97,44): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\liamd\OneDrive\Documents\Visual Studio Projects\CellularAutomataGame\Game.cpp(99,44): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
 C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include\utility(250,16): warning C4267: 'initializing': conversion from 'size_t' to '_Ty1', possible loss of data
 C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include\utility(250,16): warning C4267:         with
 C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include\utility(250,16): warning C4267:         [
@@ -69,7 +69,7 @@ C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.3313
   (compiling source file 'Game.cpp')
   C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include\utility(250,16):
   the template instantiation context (the oldest one first) is
-  	C:\Users\liamd\OneDrive\Documents\Visual Studio Projects\CellularAutomataGame\Game.hpp(116,12):
+  	C:\Users\liamd\OneDrive\Documents\Visual Studio Projects\CellularAutomataGame\Game.hpp(112,12):
   	see reference to function template instantiation '_Ty &std::vector<_Ty,std::allocator<_Ty>>::emplace_back<size_t,size_t>(size_t &&,size_t &&)' being compiled
           with
           [
@@ -110,10 +110,10 @@ C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.3313
   (compiling source file 'Game.cpp')
   
   View.cpp
-C:\Users\liamd\OneDrive\Documents\Visual Studio Projects\CellularAutomataGame\MyVectors.hpp(60,18): warning C4244: 'argument': conversion from 'uint16_t' to 'uint8_t', possible loss of data
+C:\Users\liamd\OneDrive\Documents\Visual Studio Projects\CellularAutomataGame\MyVectors.hpp(64,18): warning C4244: 'argument': conversion from 'uint16_t' to 'uint8_t', possible loss of data
   (compiling source file 'View.cpp')
   
-C:\Users\liamd\OneDrive\Documents\Visual Studio Projects\CellularAutomataGame\MyVectors.hpp(71,33): warning C4244: 'argument': conversion from 'float' to 'uint8_t', possible loss of data
+C:\Users\liamd\OneDrive\Documents\Visual Studio Projects\CellularAutomataGame\MyVectors.hpp(75,33): warning C4244: 'argument': conversion from 'float' to 'uint8_t', possible loss of data
   (compiling source file 'View.cpp')
   
 C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include\utility(250,16): warning C4267: 'initializing': conversion from 'size_t' to '_Ty1', possible loss of data
@@ -124,7 +124,7 @@ C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.3313
   (compiling source file 'View.cpp')
   C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include\utility(250,16):
   the template instantiation context (the oldest one first) is
-  	C:\Users\liamd\OneDrive\Documents\Visual Studio Projects\CellularAutomataGame\Game.hpp(116,12):
+  	C:\Users\liamd\OneDrive\Documents\Visual Studio Projects\CellularAutomataGame\Game.hpp(112,12):
   	see reference to function template instantiation '_Ty &std::vector<_Ty,std::allocator<_Ty>>::emplace_back<size_t,size_t>(size_t &&,size_t &&)' being compiled
           with
           [
@@ -165,10 +165,10 @@ C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.3313
   (compiling source file 'View.cpp')
   
   main.cpp
-C:\Users\liamd\OneDrive\Documents\Visual Studio Projects\CellularAutomataGame\MyVectors.hpp(60,18): warning C4244: 'argument': conversion from 'uint16_t' to 'uint8_t', possible loss of data
+C:\Users\liamd\OneDrive\Documents\Visual Studio Projects\CellularAutomataGame\MyVectors.hpp(64,18): warning C4244: 'argument': conversion from 'uint16_t' to 'uint8_t', possible loss of data
   (compiling source file 'main.cpp')
   
-C:\Users\liamd\OneDrive\Documents\Visual Studio Projects\CellularAutomataGame\MyVectors.hpp(71,33): warning C4244: 'argument': conversion from 'float' to 'uint8_t', possible loss of data
+C:\Users\liamd\OneDrive\Documents\Visual Studio Projects\CellularAutomataGame\MyVectors.hpp(75,33): warning C4244: 'argument': conversion from 'float' to 'uint8_t', possible loss of data
   (compiling source file 'main.cpp')
   
 C:\Users\liamd\OneDrive\Documents\Visual Studio Projects\CellularAutomataGame\main.cpp(18,11): warning C4244: 'initializing': conversion from '_Rep' to 'int', possible loss of data
@@ -184,7 +184,7 @@ C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.3313
   (compiling source file 'main.cpp')
   C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include\utility(250,16):
   the template instantiation context (the oldest one first) is
-  	C:\Users\liamd\OneDrive\Documents\Visual Studio Projects\CellularAutomataGame\Game.hpp(116,12):
+  	C:\Users\liamd\OneDrive\Documents\Visual Studio Projects\CellularAutomataGame\Game.hpp(112,12):
   	see reference to function template instantiation '_Ty &std::vector<_Ty,std::allocator<_Ty>>::emplace_back<size_t,size_t>(size_t &&,size_t &&)' being compiled
           with
           [
@@ -225,6 +225,5 @@ C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.3313
   (compiling source file 'main.cpp')
   
   Generating Code...
-C:\Users\liamd\OneDrive\Documents\Visual Studio Projects\CellularAutomataGame\Macros.hpp(101): warning C4715: 'THERM_COEF': not all control paths return a value
-C:\Users\liamd\OneDrive\Documents\Visual Studio Projects\CellularAutomataGame\Game.hpp(109): warning C4715: 'Game::getTemp': not all control paths return a value
+C:\Users\liamd\OneDrive\Documents\Visual Studio Projects\CellularAutomataGame\Macros.hpp(88): warning C4715: 'THERM_COEF': not all control paths return a value
   CellularAutomataGame.vcxproj -> C:\Users\liamd\OneDrive\Documents\Visual Studio Projects\CellularAutomataGame\x64\Debug\CellularAutomataGame.exe
